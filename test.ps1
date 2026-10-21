@@ -9,6 +9,7 @@ $references += '/reference:' + (Join-Path $projectPath 'vendor/LibreHardwareMoni
 $sources = Get-ChildItem -LiteralPath (Join-Path $projectPath 'src') -Filter '*.cs' | ForEach-Object FullName
 $sources += Get-ChildItem -LiteralPath (Join-Path $projectPath 'tests') -Filter '*.cs' | ForEach-Object FullName
 $catalogResources = @('models.json','panels.json') | ForEach-Object { '/resource:' + (Join-Path $projectPath ('data/' + $_)) + ',PcPulse.Data.' + $_ }
+$catalogResources += '/resource:' + (Join-Path $projectPath 'PRIVACY.md') + ',PcPulse.Privacy.md'
 & (Join-Path $frameworkPath 'csc.exe') /nologo /target:exe /platform:x64 /optimize+ /utf8output /main:PcPulseTests.SmokeTests ('/out:' + (Join-Path $testPath 'SmokeTests.exe')) ('/resource:' + (Join-Path $projectPath 'src/Dashboard.xaml') + ',Dashboard.xaml') ('/resource:' + (Join-Path $projectPath 'src/assets/adamo-logo-transparent.png') + ',PcPulse.BrandLogo.png') @catalogResources @references @sources
 if ($LASTEXITCODE -ne 0) { throw 'Test compilation failed.' }
 Get-ChildItem -LiteralPath (Join-Path $projectPath 'dist') -Filter '*.dll' | Copy-Item -Destination $testPath

@@ -30,6 +30,8 @@ namespace PcPulseTests
             if (args.Contains("--crm-only"))
             {
                 var crmApp = new Application { ShutdownMode = ShutdownMode.OnExplicitShutdown };
+                Run("Privacy preferences default to local use and preserve explicit choices", PrivacySettingsTests.Run);
+                Run("Privacy dialog saves opt-in, opt-out and storage failures safely", PrivacySettingsTests.RunUi);
                 Run("CRM transport validates office access, saves exact retries and protects credentials", CrmIntakeClientTests.Run);
                 Run("CRM product data excludes private identifiers and marks uncertain measurements", CrmProductDraftTests.Run);
                 Run("Legacy CRM dialog remains compatible for existing tests", CrmProductDraftTests.RunUi);
@@ -108,6 +110,7 @@ namespace PcPulseTests
             }
 
             Run("Unavailable sensor readings do not become zero", MissingValues);
+            Run("Privacy preferences default to local use and preserve explicit choices", PrivacySettingsTests.Run);
             Run("CRM transport validates office access, saved retries and credentials", CrmIntakeClientTests.Run);
             Run("CRM product projection keeps only reviewed hardware data", CrmProductDraftTests.Run);
             Run("Minimal CRM client authenticates, validates responses and safely resumes", CrmQuickIntakeClientTests.Run);
@@ -165,6 +168,7 @@ namespace PcPulseTests
             // Dialog tests close unowned fixture windows while pumping the Dispatcher.
             // Keep the shared test Application alive until the runner exits.
             var app = new Application { ShutdownMode = ShutdownMode.OnExplicitShutdown };
+            Run("Privacy dialog saves opt-in, opt-out and storage failures safely", PrivacySettingsTests.RunUi);
             Run("CRM dialog handles quantity, reviewed photo and pending operations", CrmProductDraftTests.RunUi);
             Run("Minimal CRM dialog asks only password, quantity and condition", CrmQuickIntakeWindowTests.Run);
             Run("Minimal CRM flow sends the frozen first page through the actual v2 client", CrmQuickFlowTests.Run);

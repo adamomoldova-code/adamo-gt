@@ -1,6 +1,12 @@
 # ADAMO GT — privacy and removal
 
-This document describes ADAMO GT 2.7.1 and its optional office CRM integration. Earlier versions may have different optional features.
+This document describes ADAMO GT 2.7.2 and its optional office CRM integration. The previously published 2.7.1 executable has no first-use CRM preference; its background availability checks are described separately below.
+
+## Your choice at first use
+
+Before any automatic CRM availability request, the graphical 2.7.2 application displays its privacy summary and this full policy. Automatic CRM checks are off by default. Saving the unchecked choice or closing that window leaves them off. To enable the office-only CRM button, explicitly enable the CRM check and save. Change or revoke this choice later in **Датчики → Confidențialitate**. Disabling it cancels the current availability check, rejects late results and prevents further checks. Local hardware diagnostics and tests remain available.
+
+This preference only controls automatic CRM availability checks. Online port lookup, optional driver download, links and explicit diagnostic commands keep their separate user-requested behavior described below. There is no general permission to upload reports or device media.
 
 ## Local diagnostics
 
@@ -22,7 +28,7 @@ If the user chooses Install PawnIO in the sensor help window, ADAMO GT downloads
 
 ### Optional CRM submission
 
-Normal application startup and periodic/network-change checks make an anonymous HTTPS request to the fixed `https://crm.adamo.md` availability endpoint to decide whether the CRM button may be shown. This request contains no hardware report, password or token; CRM sees the connection IP. No positive decision is persisted or reused through the HTTP cache.
+In 2.7.2, only after the operator explicitly enables automatic CRM checks, startup and periodic/network-change checks make an anonymous HTTPS request to the fixed `https://crm.adamo.md` availability endpoint to decide whether the CRM button may be shown. This request contains no hardware report, password or token; CRM sees the connection IP. No positive office-access decision is persisted or reused through the HTTP cache. The previously published 2.7.1 performs these checks automatically without this preference.
 
 The form asks only for the integration password, quantity and condition. On explicit submission it sends an allowlisted hardware projection and the captured content of the real first page, including visible temperatures/status text, but excluding the desktop, other windows, password dialog and tooltips. The image is captured before the password dialog; camera/microphone/keyboard data and the full JSON report are not attached. The captured page and structured hardware are fixed together; subsequent sensor refreshes do not change a pending submission. The structured projection excludes Windows computer names, serial-derived hardware identifiers, local paths and raw diagnostic errors.
 
@@ -34,6 +40,7 @@ Uploaded screenshots follow CRM's media visibility and retention rules and are n
 
 - `%PROGRAMDATA%\ADAMO GT\History`: shared local benchmark and device-test history. Ordinary local Windows users can read it; administrators and SYSTEM can write it. It is not private to one Windows account. Hardware matching uses hashed identifiers.
 - `%LOCALAPPDATA%\ADAMO GT\Runtime`: extracted files from the single-file launcher.
+- `%LOCALAPPDATA%\ADAMO GT\privacy.json`: privacy-policy version and the operator's automatic CRM-check preference; no hardware data, password or token. Missing, corrupt or obsolete preferences disable automatic CRM checks until a new explicit choice.
 - `%LOCALAPPDATA%\PcPulse\specifications`: saved model specifications.
 - `%LOCALAPPDATA%\PcPulse\last-error.log`: latest application error; exception details may include local paths.
 - Reports are saved only at a user-selected location, normally under `%LOCALAPPDATA%\PcPulse\reports`. They can include the computer name, model/SKU, hardware and device identifiers, measurements, dates and manual verdicts. Review them before sharing. The application does not upload them.
@@ -49,5 +56,6 @@ Stress tests start only when selected and started manually. CPU/RAM/GPU loads op
 3. To erase shared test history for all users, an administrator can remove `%PROGRAMDATA%\ADAMO GT\History`. This removes the record that prevents first-run automatic tests; running the app again may start those tests again.
 4. Delete the specification cache and error log listed above if unwanted. Remove saved reports separately, including any reports saved outside the default folder. Do not delete unrelated files merely because they are in a parent directory.
 5. If PawnIO was installed, uninstall it separately using Windows Settings → Apps and its own uninstaller. Other hardware-monitoring programs may also use it. Deleting ADAMO GT does not uninstall that driver.
+6. To erase the privacy choice, remove `%LOCALAPPDATA%\ADAMO GT\privacy.json`. The next graphical 2.7.2 launch will display the policy again with automatic CRM checks off by default.
 
 Project information and contact: [ADAMO.MD](https://adamo.md/).

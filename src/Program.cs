@@ -16,8 +16,8 @@ using System.Windows.Media.Imaging;
 [assembly: AssemblyTitle("ADAMO GT")]
 [assembly: AssemblyProduct("ADAMO GT")]
 [assembly: AssemblyDescription("Показатели компьютера на одном экране")]
-[assembly: AssemblyVersion("2.7.1.0")]
-[assembly: AssemblyFileVersion("2.7.1.0")]
+[assembly: AssemblyVersion("2.7.2.0")]
+[assembly: AssemblyFileVersion("2.7.2.0")]
 
 namespace PcPulse
 {
@@ -50,6 +50,7 @@ namespace PcPulse
         private static StressTestsWindow stressWindow;
         private static StressRunResult lastStressResult;
         private static bool closeAfterStress;
+        private static Action showPrivacySettings;
 
         [STAThread]
         public static int Main(string[] args)
@@ -191,7 +192,9 @@ namespace PcPulse
                     }
                 };
                 dashboard.SaveReportRequested += delegate { SaveReport(window, dashboard); };
+                var privacySettings = PrivacySettings.OpenDefault();
                 var crmOfficeAccess = new CrmOfficeAccess();
+                crmOfficeAccess.SetEnabled(false);
                 var crmAccessCancellation = new CancellationTokenSource();
                 CancellationToken crmAccessToken = crmAccessCancellation.Token;
                 var crmAccessTimer = new System.Windows.Threading.DispatcherTimer
@@ -212,6 +215,16 @@ namespace PcPulse
                     if (stopping || crmAccessToken.IsCancellationRequested) { return; }
                     await crmOfficeAccess.RefreshAsync(crmAccessToken);
                 };
+                showPrivacySettings = delegate
+                {
+                    if (stopping) { return; }
+                    var privacyDialog = new PrivacySettingsWindow(privacySettings) { Owner = window };
+                    DialogViewport.Fit(privacyDialog, DialogViewport.WorkArea(window));
+                    privacyDialog.ShowDialog();
+                    crmOfficeAccess.SetEnabled(privacySettings.HasChoice && privacySettings.AutomaticCrmChecks);
+                    applyCrmAccess();
+                    refreshCrmAccess();
+                };
                 System.Net.NetworkInformation.NetworkAddressChangedEventHandler crmNetworkChanged = delegate
                 {
                     crmOfficeAccess.Invalidate();
@@ -226,6 +239,9 @@ namespace PcPulse
                 window.Activated += delegate { refreshCrmAccess(); };
                 window.Loaded += delegate
                 {
+                    if (!privacySettings.HasChoice) { showPrivacySettings(); }
+                    if (stopping) { return; }
+                    crmOfficeAccess.SetEnabled(privacySettings.HasChoice && privacySettings.AutomaticCrmChecks);
                     System.Net.NetworkInformation.NetworkChange.NetworkAddressChanged += crmNetworkChanged;
                     System.Net.NetworkInformation.NetworkChange.NetworkAvailabilityChanged += crmNetworkAvailabilityChanged;
                     crmAccessTimer.Start();
@@ -233,6 +249,7 @@ namespace PcPulse
                 };
                 window.Closed += delegate
                 {
+                    showPrivacySettings = null;
                     crmAccessTimer.Stop();
                     System.Net.NetworkInformation.NetworkChange.NetworkAddressChanged -= crmNetworkChanged;
                     System.Net.NetworkInformation.NetworkChange.NetworkAvailabilityChanged -= crmNetworkAvailabilityChanged;
@@ -935,6 +952,9 @@ namespace PcPulse
             buttons.Children.Add(driver);
             buttons.Children.Add(admin);
             buttons.Children.Add(library);
+            var privacy = HelpButton("Confidențialitate");
+            privacy.Click += delegate { dialog.Close(); if (showPrivacySettings != null) { showPrivacySettings(); } };
+            buttons.Children.Add(privacy);
             panel.Children.Add(buttons);
             dialog.Content = new ScrollViewer { Content = panel, VerticalScrollBarVisibility = ScrollBarVisibility.Auto };
             DialogViewport.Fit(dialog, DialogViewport.WorkArea(owner));

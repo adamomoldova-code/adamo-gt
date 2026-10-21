@@ -15,6 +15,7 @@ namespace PcPulseTests
             TestDeadline();
             TestInvalidatedResultAndSingleFlight();
             TestDisposal();
+            TestPrivacyDisabled();
             Console.WriteLine("PASS CRM availability: fixed anonymous endpoint, strict boolean, timeout, cancellation, single flight and stale results");
         }
 
@@ -144,6 +145,31 @@ namespace PcPulseTests
             response.SetResult(Available(true));
             Complete(access.RefreshAsync(CancellationToken.None));
             Require(!access.IsAllowed && transport.Calls == 1, "Disposal cancels monitoring and prevents late reactivation or new requests");
+        }
+
+        private static void TestPrivacyDisabled()
+        {
+            var transport = new RecordingTransport();
+            var late = new TaskCompletionSource<CrmHttpResponse>();
+            transport.Enqueue(late.Task);
+            transport.Enqueue(Task.FromResult(Available(true)));
+            using (var access = new CrmOfficeAccess(transport))
+            {
+                access.SetEnabled(false);
+                for (int i = 0; i < 5; i++) { Complete(access.RefreshAsync(CancellationToken.None)); access.Invalidate(); }
+                Require(transport.Calls == 0 && !access.IsAllowed, "A disabled CRM preference prevents timer, activation and network-change requests");
+                access.SetEnabled(true);
+                Task request = access.RefreshAsync(CancellationToken.None); transport.WaitForCalls(1);
+                access.SetEnabled(false); Complete(request);
+                Require(transport.LastToken.IsCancellationRequested && !access.IsAllowed, "Disabling CRM cancels in-flight access and hides the button immediately");
+                late.SetResult(Available(true));
+                Complete(access.RefreshAsync(CancellationToken.None));
+                Require(!access.IsAllowed && transport.Calls == 1, "A late successful response cannot override a disabled preference");
+                access.SetEnabled(true); Complete(access.RefreshAsync(CancellationToken.None));
+                Require(access.IsAllowed && transport.Calls == 2, "Explicitly enabling CRM still requires a new server decision");
+                access.SetEnabled(false);
+                Require(!access.IsAllowed, "A previously allowed office decision is cleared on opt-out");
+            }
         }
 
         private static CrmHttpResponse Available(bool value) { return new CrmHttpResponse { StatusCode = 200, Body = value ? "{\"available\":true}" : "{\"available\":false}" }; }

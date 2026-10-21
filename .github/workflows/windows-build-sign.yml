@@ -5,6 +5,8 @@ name: Windows build and optional SignPath signing
 on:
   push:
     branches: [main]
+  pull_request:
+    branches: [main]
   workflow_dispatch:
     inputs:
       sign_release:
