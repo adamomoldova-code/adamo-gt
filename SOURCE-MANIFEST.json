@@ -6,8 +6,8 @@
   },
   {
     "Path": ".github/workflows/windows-build-sign.yml",
-    "Length": 9956,
-    "Sha256": "66ae1f87346c1017c0bba57b77985c8d5cf0433f1c835a43bcfd70d39be571ba"
+    "Length": 9985,
+    "Sha256": "b5823eef0ee921f5801d54295c1e9629d649edafe4d6df9be81feb2144a04a79"
   },
   {
     "Path": ".gitignore",
