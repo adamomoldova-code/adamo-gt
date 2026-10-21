@@ -38,6 +38,7 @@ $references = @('System.dll','System.Core.dll','System.Security.dll','System.Man
 $references += '/reference:' + (Join-Path $vendorPath 'LibreHardwareMonitorLib.dll')
 $sources = Get-ChildItem -LiteralPath (Join-Path $projectPath 'src') -Filter '*.cs' | ForEach-Object FullName
 $catalogResources = @('models.json','panels.json') | ForEach-Object { '/resource:' + (Join-Path $projectPath ('data/' + $_)) + ',PcPulse.Data.' + $_ }
+$catalogResources += '/resource:' + (Join-Path $projectPath 'PRIVACY.md') + ',PcPulse.Privacy.md'
 & (Join-Path $frameworkPath 'csc.exe') /nologo /target:winexe /platform:x64 /optimize+ /utf8output ('/out:' + (Join-Path $distPath 'ADAMO-GT.exe')) ('/win32icon:' + $iconPath) ('/win32manifest:' + (Join-Path $projectPath 'src/app.manifest')) ('/resource:' + (Join-Path $projectPath 'src/Dashboard.xaml') + ',Dashboard.xaml') ('/resource:' + $brandPath + ',PcPulse.BrandLogo.png') @catalogResources @references @sources
 if ($LASTEXITCODE -ne 0) { throw 'C# compilation failed.' }
 Get-ChildItem -LiteralPath $vendorPath -Filter '*.dll' | Where-Object { $_.Name -notmatch '^(Aga\.|OxyPlot|Microsoft\.Win32\.TaskScheduler)' } | Copy-Item -Destination $distPath

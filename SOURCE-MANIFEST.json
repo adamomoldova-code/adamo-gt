@@ -1,13 +1,13 @@
 [
   {
     "Path": ".gitattributes",
-    "Length": 94,
-    "Sha256": "162a73eeac5a3fbacc6b93e05536f8a33ccaa01bbf5bb732f92f41ca4b270ef6"
+    "Length": 160,
+    "Sha256": "eef173805f81b379a6d7e312c64c33d0adec8990220d9ff3f3cfa2e0c2198481"
   },
   {
     "Path": ".github/workflows/windows-build-sign.yml",
-    "Length": 9985,
-    "Sha256": "b5823eef0ee921f5801d54295c1e9629d649edafe4d6df9be81feb2144a04a79"
+    "Length": 10022,
+    "Sha256": "910e2a9c7832de170b8736e3600a1200e6185adeb30b9f2dca1a8aae73d9d88d"
   },
   {
     "Path": ".gitignore",
@@ -21,13 +21,13 @@
   },
   {
     "Path": "build.ps1",
-    "Length": 5008,
-    "Sha256": "0f425ef273dbd6d099120f39f26749d1cc62c07d91c42f875bb1a7c8e5034dc9"
+    "Length": 5106,
+    "Sha256": "73da1c021d4f3763e67941474859d36c3cdc80250c8db4ae8e554cd0b44226e8"
   },
   {
     "Path": "CODE-SIGNING.md",
-    "Length": 4090,
-    "Sha256": "9366f0f82169c19c2a037f4f4c37f4bb9399beffe0febe752006ddf489df196b"
+    "Length": 4631,
+    "Sha256": "4c97094c53563a9e79967271a3fc56d0a73aaa7dc0646b111470650bdabdfc25"
   },
   {
     "Path": "COMPATIBILITY.md",
@@ -61,13 +61,13 @@
   },
   {
     "Path": "PRIVACY.md",
-    "Length": 6981,
-    "Sha256": "2eb342d2bcd874220f6f22b6b6d636b3daa67208bf79e539a1adbe91060ebf2d"
+    "Length": 8531,
+    "Sha256": "aa781cb64b2f49b3eb94785906eaa81afb83923cab378ca29bd78384d2c4c1b0"
   },
   {
     "Path": "README.md",
-    "Length": 8731,
-    "Sha256": "5d26e2537005c36b54c15b2b041e77991f33ce13d8add16cea2852eac1d36e57"
+    "Length": 9125,
+    "Sha256": "6f80bca9d8f50445a96a7e6c86257b3821d2a56fab7fe098194b10123fb205a6"
   },
   {
     "Path": "scripts/Export-PublicSource.ps1",
@@ -171,8 +171,8 @@
   },
   {
     "Path": "src/CrmOfficeAccess.cs",
-    "Length": 8079,
-    "Sha256": "b567e02fdb2ce0672d6a271cb83c2aed4e46c4d679fdd2278f2d2bfe90205727"
+    "Length": 8775,
+    "Sha256": "bc911244bc7b7a3d67aa0183d6dea18874b0ab972c3abe6d9bfc00f1067bdd50"
   },
   {
     "Path": "src/CrmProductDraft.cs",
@@ -300,9 +300,14 @@
     "Sha256": "592b92857eddc29210547fc552b187e84789b5dabf78221ed884b4286d8f7bb1"
   },
   {
+    "Path": "src/PrivacySettings.cs",
+    "Length": 7772,
+    "Sha256": "bfb79cdbd5f0fc20d1400356a1d7f2349ad3928a1fc7d5dccb26dbc44429e9f2"
+  },
+  {
     "Path": "src/Program.cs",
-    "Length": 64304,
-    "Sha256": "c3b5e92e8286999618b9de7890163f381b4fb2718b9378ae05f95f4be8fee67a"
+    "Length": 65563,
+    "Sha256": "b1e8f821c65d1a7bb4cba4ea56246cf342c211d5e4bf60da2fdac5719fe55d5e"
   },
   {
     "Path": "src/ScreenInventory.cs",
@@ -376,8 +381,8 @@
   },
   {
     "Path": "test.ps1",
-    "Length": 2871,
-    "Sha256": "5c4eeb95b9f3e2b774d0abf6f030338be05338a2d3723d73570d52edc46c24fd"
+    "Length": 2969,
+    "Sha256": "efcacc3ee703b54c3a93851b5d12d3f8a415b4eb9c89e81844e8f5897722a844"
   },
   {
     "Path": "tests/AdditionalCompatibilityTests.cs",
@@ -421,8 +426,8 @@
   },
   {
     "Path": "tests/CrmOfficeAccessTests.cs",
-    "Length": 10501,
-    "Sha256": "1b2508d0c2a3cd3b9e25a7ffff6f949419fa0ff0f08976c12da0f5dd6283a176"
+    "Length": 12248,
+    "Sha256": "56efa092743e5c323c033dee990a39ff281ea8365a795ef6b7fc4d5b239b6ae5"
   },
   {
     "Path": "tests/CrmProductDraftTests.cs",
@@ -645,6 +650,11 @@
     "Sha256": "b49575cbd8f8485b9972b3f91a43244063ef47e7dab2100210f17abf625ec4ee"
   },
   {
+    "Path": "tests/PrivacySettingsTests.cs",
+    "Length": 6088,
+    "Sha256": "35719bcdcc7d4bff5ef1e4b28243a9b981164c8a1f710017e1dabfa290975c21"
+  },
+  {
     "Path": "tests/resolution/README.md",
     "Length": 6469,
     "Sha256": "aad857a2052b2e02b7baac8bfdb169d78f4afca14397e53af3b998f262dca6f9"
@@ -676,8 +686,8 @@
   },
   {
     "Path": "tests/SmokeTests.cs",
-    "Length": 50094,
-    "Sha256": "c9354190f4e75f09b23090567b2574ec20e0a7b1b486799a7238d97e5d1c040c"
+    "Length": 50566,
+    "Sha256": "ef5c717db60b42f5fa89c7c3420bdb0689a2ae083946ace2146ed9802976dddd"
   },
   {
     "Path": "tests/StartupSequenceTests.cs",

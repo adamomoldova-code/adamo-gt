@@ -1,6 +1,6 @@
 # Code signing policy
 
-Status as of 21 October 2026: the published ADAMO GT 2.7.1 application and single-file launcher remain unsigned. The owner authorized MIT licensing of the original code and bundled original artwork, and publication to [adamomoldova-code/adamo-gt](https://github.com/adamomoldova-code/adamo-gt). The license is recorded in [LICENSE](LICENSE). A verified GitHub-hosted build, named signing roles and the Foundation application remain pending. No Foundation signing access has been assigned. Do not present this document as proof of a digital signature.
+Status as of 21 October 2026: the published ADAMO GT 2.7.1 application and single-file launcher remain unsigned. The owner authorized MIT licensing of the original code and bundled original artwork, and publication to [adamomoldova-code/adamo-gt](https://github.com/adamomoldova-code/adamo-gt). The license is recorded in [LICENSE](LICENSE). The original public source passed its [GitHub-hosted build](https://github.com/adamomoldova-code/adamo-gt/actions/runs/39620871067). The 2.7.2 candidate adds the embedded privacy policy and an explicit preference for background CRM availability checks. Foundation acceptance, MFA verification and signing-service configuration remain pending. No Foundation signing access has been assigned. Do not present this document as proof of a digital signature.
 
 ## Proposed scope after approval
 
@@ -8,7 +8,7 @@ Only ADAMO GT's own application executable and single-file launcher, built from 
 
 The build first compiles and submits the inner ADAMO-GT.exe. After its signature is verified, it is included in the launcher's embedded payload and manifest. The newly built launcher is then submitted separately. Both signatures must be verified before archives and SHA-256 checksums are created. Approval of the custom embedded-payload arrangement must be confirmed with SignPath.
 
-Every release requires manual approval from a designated maintainer. Participants must use MFA for the repository and signing service. The public repository, named authors/reviewers and signing approvers are still awaiting owner selection; those identities must be recorded here before application submission. No fictitious user or team is assigned.
+Repository maintainer and reviewer: [adamomoldova-code](https://github.com/adamomoldova-code), the authenticated account that owns this repository. The intended release approver is that maintainer account; SignPath membership and actual signing authorization are not configured yet. Every signing request must receive manual approval. Participants must use MFA for both repository and signing-service access, and the maintainer must verify that requirement before application submission.
 
 ## Foundation credit
 
@@ -20,7 +20,7 @@ That credit describes the proposed future service, not the current unsigned rele
 
 ## Privacy
 
-In the published 2.7.1 source, online model lookup and the optional driver download are user-requested operations. Startup and network-change checks make an anonymous request to the fixed CRM availability endpoint; the service receives the connection IP, but no hardware report. Hardware specifications and the first-page screenshot are sent only when the operator explicitly submits the optional CRM form. See [ADAMO GT privacy and removal](PRIVACY.md), including the historical difference from 2.5.1. Reports and manual device media are not automatically uploaded.
+Online model lookup and the optional driver download are user-requested operations. In the 2.7.2 candidate, the first graphical launch presents the privacy policy; automatic CRM availability checks stay off until the operator explicitly enables and saves that preference. The fixed CRM service receives the connection IP, but no hardware report, during availability checks. The published 2.7.1 performs these checks automatically. Hardware specifications and the first-page screenshot are sent only when the operator explicitly submits the optional CRM form. See [ADAMO GT privacy and removal](PRIVACY.md), including stored preferences and removal instructions. Reports and manual device media are not automatically uploaded.
 
 ## Windows trust and reputation
 

@@ -19,12 +19,26 @@ namespace PcPulse
         private CancellationTokenSource refreshCancellation;
         private long generation, activeGeneration;
         private bool allowed, disposed, queuedRefresh;
+        private bool enabled = true;
         private CancellationToken queuedCancellation;
 
         public event Action<bool> AccessChanged;
         public bool IsAllowed { get { lock (gate) { return allowed; } } }
 
         public CrmOfficeAccess() : this(new CrmHttpTransport()) { }
+
+        public void SetEnabled(bool value)
+        {
+            CancellationTokenSource cancellation;
+            lock (gate)
+            {
+                if (disposed || enabled == value) { return; }
+                enabled = value; generation++; queuedRefresh = false;
+                cancellation = refreshCancellation;
+                PublishLocked(false);
+            }
+            Cancel(cancellation);
+        }
         internal CrmOfficeAccess(ICrmTransport transport)
             : this(transport, delegate(TimeSpan duration, CancellationToken token) { return Task.Delay(duration, token); }) { }
         internal CrmOfficeAccess(ICrmTransport transport, Func<TimeSpan, CancellationToken, Task> delay)
@@ -38,7 +52,7 @@ namespace PcPulse
         {
             lock (gate)
             {
-                if (disposed) { return Task.FromResult(false); }
+                if (disposed || !enabled) { return Task.FromResult(false); }
                 if (token.IsCancellationRequested)
                 {
                     PublishLocked(false);
@@ -93,9 +107,14 @@ namespace PcPulse
             {
                 CancellationToken token = cancellation.Token;
                 token.ThrowIfCancellationRequested();
-                Task<CrmHttpResponse> request = transport.SendAsync(AvailabilityUri, "GET", null, null, token);
-                if (request == null) { return; }
-                lock (gate) { pendingRequest = request; }
+                Task<CrmHttpResponse> request;
+                lock (gate)
+                {
+                    if (disposed || !enabled || generation != requestedGeneration || token.IsCancellationRequested) { return; }
+                    request = transport.SendAsync(AvailabilityUri, "GET", null, null, token);
+                    if (request == null) { return; }
+                    pendingRequest = request;
+                }
                 Task observer = request.ContinueWith(delegate(Task<CrmHttpResponse> completed)
                 {
                     // A timeout can finish the visibility check before an uncooperative
@@ -141,7 +160,7 @@ namespace PcPulse
 
         private void StartQueuedRefreshLocked()
         {
-            if (disposed || !queuedRefresh || refreshTask != null || (pendingRequest != null && !pendingRequest.IsCompleted)) { return; }
+            if (disposed || !enabled || !queuedRefresh || refreshTask != null || (pendingRequest != null && !pendingRequest.IsCompleted)) { return; }
             if (queuedCancellation.IsCancellationRequested) { queuedRefresh = false; return; }
             StartRefreshLocked(queuedCancellation);
         }

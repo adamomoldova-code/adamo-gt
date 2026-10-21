@@ -6,9 +6,11 @@ ADAMO GT displays CPU, RAM, GPU, storage, battery, display and model information
 
 Project and downloads: [ADAMO.MD](https://adamo.md/ro/blog/adamo-gt-verificare-laptop-pc).
 
-## Version 2.7.1
+## Version 2.7.2 — signing preparation
 
-This source builds ADAMO GT 2.7.1 with the simplified office CRM flow described below. Official download availability is listed on the project page linked above. The executable is unsigned; no SignPath Foundation approval or signed release exists yet.
+This source builds the ADAMO GT 2.7.2 signing-preparation candidate with the simplified office CRM flow described below. The published download is still unsigned 2.7.1. No SignPath Foundation approval or signed release exists yet.
+
+On first graphical use, 2.7.2 presents the embedded privacy policy. Automatic CRM availability checks are off until explicitly enabled and saved. Change this choice in **Датчики → Confidențialitate**; local diagnostics continue to work with CRM disabled. Missing, corrupt or obsolete preferences leave automatic CRM checks disabled.
 
 This version retains selectable RAM stress allocation, established Windows/OEM temperature providers and the camera compatibility fixes. It does not install sensor drivers automatically or change Windows security settings. The camera waits for actual frames and uses a bounded in-memory RGB display path; no image or video is saved. iMac/Boot Camp compatibility still requires validation on the affected computer with its camera driver.
 
@@ -16,7 +18,7 @@ The original ADAMO GT code, documentation and original bundled artwork are avail
 
 ## CRM
 
-The **CRM** button appears only when the server confirms office access. Click it, enter the integration password, choose quantity and condition, then click **Trimite și imprimă**. The server must have the office IP, credentials, warehouse and printer configured; without that confirmation the button stays hidden. Local diagnostics remain available.
+The **CRM** button appears only after the operator enables automatic CRM checks and the server confirms office access. Click it, enter the integration password, choose quantity and condition, then click **Trimite și imprimă**. The server must have the office IP, credentials, warehouse and printer configured; without that confirmation the button stays hidden. Local diagnostics remain available.
 
 The app automatically prepares hardware specifications and a real screenshot of its first page before the password dialog opens. It captures the application content, including visible status text, without the desktop, other windows or the password. Structured data omits computer names, serial identifiers and raw logs; unknown hardware values remain unknown. External or unclassified disks and external displays are omitted from the automatic product data. For quantity above one, the same configuration is applied to all units while the screenshot describes this computer.
 
