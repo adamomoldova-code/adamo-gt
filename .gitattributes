@@ -1,0 +1,2 @@
+# Preserve the reviewed source bytes and SOURCE-MANIFEST.json hashes on every runner.
+* -text

@@ -1,5 +1,10 @@
 [
   {
+    "Path": ".gitattributes",
+    "Length": 94,
+    "Sha256": "162a73eeac5a3fbacc6b93e05536f8a33ccaa01bbf5bb732f92f41ca4b270ef6"
+  },
+  {
     "Path": ".github/workflows/windows-build-sign.yml",
     "Length": 9956,
     "Sha256": "66ae1f87346c1017c0bba57b77985c8d5cf0433f1c835a43bcfd70d39be571ba"
@@ -10,14 +15,14 @@
     "Sha256": "f7f09a6f28b12631d5e8d2d2c9029dc055dd5e04ec84e683e3ff31bff9178c60"
   },
   {
-    "Path": "build.ps1",
-    "Length": 5008,
-    "Sha256": "0f425ef273dbd6d099120f39f26749d1cc62c07d91c42f875bb1a7c8e5034dc9"
-  },
-  {
     "Path": "build-single-file.ps1",
     "Length": 4126,
     "Sha256": "176d29e0215c6115ea8ab57a60f992e203c877d791804525e74131d4ebe85357"
+  },
+  {
+    "Path": "build.ps1",
+    "Length": 5008,
+    "Sha256": "0f425ef273dbd6d099120f39f26749d1cc62c07d91c42f875bb1a7c8e5034dc9"
   },
   {
     "Path": "CODE-SIGNING.md",
@@ -66,8 +71,8 @@
   },
   {
     "Path": "scripts/Export-PublicSource.ps1",
-    "Length": 5162,
-    "Sha256": "e547c4a48c9fd07f123ae0b53e8ee331d9f17c9fb4954e8f784c71696dce007b"
+    "Length": 5180,
+    "Sha256": "84790d5c88e57646676b4ad6da14743ec69cf3007208751c6ae619f2d4031c08"
   },
   {
     "Path": "scripts/Test-SignedBinary.ps1",
@@ -363,6 +368,11 @@
     "Path": "src/WindowsGpuTemperatureReader.cs",
     "Length": 5268,
     "Sha256": "ba80d07fdec92f3f6b04a4219b1998ef2717a9ff05a3a788202b16c51cc1470a"
+  },
+  {
+    "Path": "test-single-file.ps1",
+    "Length": 1442,
+    "Sha256": "e424f7fbc693b761fffe472e2f380e060915cdd7c59f1e4c0ce909e0fa6df26f"
   },
   {
     "Path": "test.ps1",
@@ -715,11 +725,6 @@
     "Sha256": "455f66de84da14514ddc9f6ba1f0bdc47a30c815845a1efb68b47378f788fef8"
   },
   {
-    "Path": "test-single-file.ps1",
-    "Length": 1442,
-    "Sha256": "e424f7fbc693b761fffe472e2f380e060915cdd7c59f1e4c0ce909e0fa6df26f"
-  },
-  {
     "Path": "THIRD-PARTY-NOTICES.md",
     "Length": 2240,
     "Sha256": "88d1e6d910c5abcef194e449ad581ebed2aef692a1e7df8af62f7fb1fe27315b"
@@ -778,16 +783,6 @@
     "Path": "vendor/HidSharp.nupkg",
     "Length": 1175217,
     "Sha256": "cf55d4b4d7b42dc1d8496b7b592ba00d1ecd48a70bc07bd8dabd3e9976d108e7"
-  },
-  {
-    "Path": "vendor/LibreHardwareMonitor.LICENSE.txt",
-    "Length": 16725,
-    "Sha256": "1f256ecad192880510e84ad60474eab7589218784b9a50bc7ceee34c2b91f1d5"
-  },
-  {
-    "Path": "vendor/LibreHardwareMonitor.THIRD-PARTY-NOTICES.txt",
-    "Length": 25905,
-    "Sha256": "a60d5ee62f4d700caff38566f42874d554b8b530437c72804fb28b958cfbda9b"
   },
   {
     "Path": "vendor/LibreHardwareMonitor-0.9.6/BlackSharp.Core.dll",
@@ -908,6 +903,16 @@
     "Path": "vendor/LibreHardwareMonitor-0.9.6/System.Threading.Tasks.Extensions.dll",
     "Length": 27960,
     "Sha256": "af4e13ef418fd89b432de20cd1dfb7fa10a7179c8dd049c9856316e50c5949ca"
+  },
+  {
+    "Path": "vendor/LibreHardwareMonitor.LICENSE.txt",
+    "Length": 16725,
+    "Sha256": "1f256ecad192880510e84ad60474eab7589218784b9a50bc7ceee34c2b91f1d5"
+  },
+  {
+    "Path": "vendor/LibreHardwareMonitor.THIRD-PARTY-NOTICES.txt",
+    "Length": 25905,
+    "Sha256": "a60d5ee62f4d700caff38566f42874d554b8b530437c72804fb28b958cfbda9b"
   },
   {
     "Path": "vendor/Microsoft.MIT.LICENSE.txt",

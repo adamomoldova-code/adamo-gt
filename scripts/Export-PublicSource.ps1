@@ -22,7 +22,7 @@ function Add-SourceFile([string]$relative, [bool]$optional = $false) {
 foreach ($relative in @('build.ps1', 'test.ps1', 'build-single-file.ps1', 'test-single-file.ps1', 'package.ps1', 'COMPATIBILITY.md', 'SINGLE-FILE.md')) {
     Add-SourceFile $relative
 }
-foreach ($relative in @('README.md', 'LICENSE', 'LICENSE.md', 'LICENSE.txt', 'PRIVACY.md', 'CODE-SIGNING.md', 'THIRD-PARTY-NOTICES.md', '.gitignore')) {
+foreach ($relative in @('README.md', 'LICENSE', 'LICENSE.md', 'LICENSE.txt', 'PRIVACY.md', 'CODE-SIGNING.md', 'THIRD-PARTY-NOTICES.md', '.gitignore', '.gitattributes')) {
     Add-SourceFile $relative $true
 }
 foreach ($item in Get-ChildItem -LiteralPath (Join-Path $projectPath 'src') -File) {
