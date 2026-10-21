@@ -1,0 +1,32 @@
+{
+  "Name": "Microsoft DiskSpd",
+  "Version": "2.3.0",
+  "License": "MIT",
+  "Distribution": "Built from MIT source by ADAMO GT; not the restricted Microsoft binary ZIP",
+  "ReleaseUrl": "https://github.com/microsoft/diskspd/releases/tag/v2.3",
+  "SourceCommit": "5e7025bfc9d1364f185d4c30963d7ac79195435e",
+  "SourceUrl": "https://github.com/microsoft/diskspd/archive/5e7025bfc9d1364f185d4c30963d7ac79195435e.zip",
+  "SourceArchive": "diskspd-v2.3-source.zip",
+  "SourceArchiveSha256": "E47A390810467CE79777D7FE34878920394921F4BDD4C146C1C19119AB1356F3",
+  "EngineSha256": "E0C1070A8481EE0C7D1C05DE4158F50019E75F20B42D1083E98870E52C02DEFF",
+  "Build": "MSVC v143 14.44.35207; Windows SDK10.0.26100.0; x64 Release; /MT; /Brepro; ATL14.44.35207",
+  "BinarySignature": "Unsigned local build; SHA256 pinned in ADAMO GT adapter",
+  "MinimumOS": "Windows 10 1803 x64, per upstream; Windows 11 target validated by ADAMO GT",
+  "Profile": "diskspd-seq-v1",
+  "ProfileParameters": {
+    "FileBytes": 1073741824,
+    "BlockBytes": 1048576,
+    "QueueDepth": 8,
+    "Threads": 1,
+    "WarmupSeconds": 1,
+    "MeasurementSeconds": 5,
+    "Directions": "Read then write",
+    "CacheFlags": "-Su (FILE_FLAG_NO_BUFFERING); write-through not requested",
+    "Affinity": "-n",
+    "BufferSeparation": "-bsp",
+    "WriteBufferRandomBytes": 67108864,
+    "Preparation": "Fully write1GiB random data and flush outside measurement",
+    "Report": "XML bytes divided by actual TestTimeSeconds",
+    "Safety": "Owned random scratch directory and pre-created file; no raw device target; child cancellation and timeout"
+  }
+}

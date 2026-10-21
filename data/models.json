@@ -1,0 +1,67 @@
+{
+  "SchemaVersion": 1,
+  "Revision": "2026.10.13",
+  "Models": [
+    {
+      "Id": "hp-zbook-firefly-14-g9",
+      "Manufacturer": "HP",
+      "Model": "HP ZBook Firefly 14 inch G9 Mobile Workstation PC",
+      "ModelAliases": [],
+      "Skus": [],
+      "MaximumRamBytes": 68719476736,
+      "Source": {
+        "Url": "https://support.hp.com/us-en/document/ish_5881971-5882022-16",
+        "Title": "HP ZBook Firefly 14 inch G9 Mobile Workstation PC specifications",
+        "CheckedOn": "2026-10-13"
+      },
+      "Note": "Паспорт модели; наличие и исправность разъёмов не проверены. SIM и Smart Card зависят от комплектации (HP QuickSpecs c08143445).",
+      "Ports": [
+        { "Name": "USB-C / Thunderbolt 4", "Count": 2, "Detail": "USB4 40 Гбит/с, DisplayPort 1.4 и Power Delivery — функции этих же двух разъёмов" },
+        { "Name": "USB-A", "Count": 2, "Detail": "5 Гбит/с; один с зарядкой" },
+        { "Name": "HDMI", "Count": 1, "Detail": "HDMI 2.0" },
+        { "Name": "Аудио · наушники/микрофон", "Count": 1, "Detail": "Комбинированный аудиоразъём" },
+        { "Name": "Слот замка безопасности", "Count": 1, "Detail": "Nano security lock" },
+        { "Name": "Smart Card", "Count": 1, "Optional": true, "Detail": "Опция комплектации" },
+        { "Name": "Nano SIM", "Count": 1, "Optional": true, "Detail": "Опция комплектации; HP QuickSpecs https://h20195.www2.hp.com/v2/GetPDF.aspx/c08143445.pdf" }
+      ]
+    },
+    {
+      "Id": "hp-zbook-firefly-16-g9",
+      "Manufacturer": "HP",
+      "Model": "HP ZBook Firefly 16 inch G9 Mobile Workstation PC",
+      "ModelAliases": [],
+      "Skus": [],
+      "MaximumRamBytes": 68719476736,
+      "Source": {
+        "Url": "https://support.hp.com/gb-en/document/ish_5881915-5882016-16",
+        "Title": "HP ZBook Firefly 16 inch G9 Mobile Workstation PC specifications",
+        "CheckedOn": "2026-10-13"
+      },
+      "Note": "Паспорт модели; наличие и исправность разъёмов не проверены. Smart Card — опция; сотовая связь требует комплектации WWAN.",
+      "Ports": [
+        { "Name": "USB-C / Thunderbolt 4", "Count": 2, "Detail": "USB4 40 Гбит/с, DisplayPort 1.4 и Power Delivery — функции этих же двух разъёмов" },
+        { "Name": "USB-A", "Count": 2, "Detail": "5 Гбит/с; один с зарядкой" },
+        { "Name": "HDMI", "Count": 1, "Detail": "HDMI 2.0" },
+        { "Name": "Аудио · наушники/микрофон", "Count": 1, "Detail": "Комбинированный аудиоразъём" },
+        { "Name": "Слот замка безопасности", "Count": 1, "Detail": "Nano security lock" },
+        { "Name": "Smart Card", "Count": 1, "Optional": true, "Detail": "Опция комплектации" },
+        { "Name": "Nano SIM", "Count": 1, "Detail": "Слот по спецификации; модем WWAN приобретается в составе комплектации" }
+      ]
+    },
+    {
+      "Id": "hp-elitebook-840-g9",
+      "Manufacturer": "HP",
+      "Model": "HP EliteBook 840 14 inch G9 Notebook PC",
+      "ModelAliases": [],
+      "Skus": [],
+      "MaximumRamBytes": 68719476736,
+      "Source": {
+        "Url": "https://support.hp.com/my-en/document/ish_6262387-6262573-16",
+        "Title": "HP EliteBook 840 14 inch G9 Notebook PC specifications",
+        "CheckedOn": "2026-10-13"
+      },
+      "Note": "В этой записи подтверждён максимум RAM. Разъёмы уточняются отдельной интернет-проверкой.",
+      "Ports": []
+    }
+  ]
+}

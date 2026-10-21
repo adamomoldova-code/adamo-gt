@@ -1,0 +1,16 @@
+{
+  "name": "smartmontools",
+  "version": "7.5",
+  "revision": "r5714",
+  "architecture": "x86_64-w64-mingw32",
+  "license": "GPL-2.0-or-later",
+  "homepage": "https://www.smartmontools.org/",
+  "release": "https://github.com/smartmontools/smartmontools/releases/tag/RELEASE_7_5",
+  "binaryArchiveUrl": "https://github.com/smartmontools/smartmontools/releases/download/RELEASE_7_5/smartmontools-7.5.win32-setup.exe",
+  "binaryArchiveSha256": "896337fcc253220614cf8cdbd5cf2321c5aa326a37a04160a672a281e6104c70",
+  "sourceArchiveUrl": "https://github.com/smartmontools/smartmontools/releases/download/RELEASE_7_5/smartmontools-7.5.tar.gz",
+  "sourceArchiveSha256": "690b83ca331378da9ea0d9d61008c4b22dde391387b9bbad7f29387f2595f76e",
+  "smartctlSha256": "b5db94e5082c042be44994b7a4fa8f7b5c8e713b2ab1c9a560d8f7a7995ea27d",
+  "driveDatabaseSha256": "dd39c6a520d38895da61923fe26fe7c9c5eb3f42325f2e4477a06ed7a61966d0",
+  "usage": "Unmodified standalone smartctl helper. Read-only information and logs; no SMART enabling, tests, configuration or write commands. Original release source archive is included alongside the executable."
+}

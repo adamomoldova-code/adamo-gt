@@ -1,0 +1,192 @@
+# Preparation only: requires Foundation acceptance, a public OSS repository,
+# protected default branch, configured environment and SignPath policies.
+name: Windows build and optional SignPath signing
+
+on:
+  workflow_dispatch:
+    inputs:
+      sign_release:
+        description: Request signing (requires Foundation approval and manual release approval)
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+  actions: read
+
+defaults:
+  run:
+    shell: powershell
+
+jobs:
+  build:
+    runs-on: windows-2022
+    timeout-minutes: 20
+    outputs:
+      runtime_artifact_id: ${{ steps.runtime.outputs.artifact-id }}
+      source_artifact_id: ${{ steps.source.outputs.artifact-id }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Build application and run automated tests
+        run: |
+          & ./build.ps1
+          & ./scripts/Test-SigningPreparation.ps1
+          & ./test.ps1
+          & ./test-single-file.ps1
+      - name: Build unsigned wrapper as a packaging check
+        run: '& ./build-single-file.ps1 -OutputDirectory ./build/unsigned-check'
+      - name: Create reviewed source archive
+        run: |
+          $export = & ./scripts/Export-PublicSource.ps1
+          Add-Type -AssemblyName System.IO.Compression.FileSystem
+          New-Item -ItemType Directory -Path build/source-artifact -Force | Out-Null
+          [IO.Compression.ZipFile]::CreateFromDirectory($export.Directory, (Join-Path $PWD 'build/source-artifact/ADAMO-GT-source.zip'))
+          Copy-Item -LiteralPath src/ADAMO-GT.ico -Destination build/source-artifact/ADAMO-GT.ico
+      - name: Upload unsigned runtime
+        id: runtime
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: adamo-gt-unsigned-runtime
+          path: dist/
+          archive: true
+          if-no-files-found: error
+          retention-days: 7
+      - name: Upload source archive
+        id: source
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: adamo-gt-source
+          path: build/source-artifact/
+          archive: true
+          if-no-files-found: error
+          retention-days: 7
+
+  sign:
+    needs: build
+    if: ${{ inputs.sign_release && github.ref == format('refs/heads/{0}', github.event.repository.default_branch) }}
+    runs-on: windows-2022
+    timeout-minutes: 75
+    # Configure required reviewers and allow only the protected default branch.
+    environment: signpath-release
+    env:
+      SIGNPATH_ORGANIZATION_ID: ${{ vars.SIGNPATH_ORGANIZATION_ID }}
+      SIGNPATH_PROJECT_SLUG: ${{ vars.SIGNPATH_PROJECT_SLUG }}
+      SIGNPATH_SIGNING_POLICY_SLUG: ${{ vars.SIGNPATH_SIGNING_POLICY_SLUG }}
+      SIGNPATH_CERTIFICATE_SUBJECT: ${{ vars.SIGNPATH_CERTIFICATE_SUBJECT }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Require complete signing configuration and approved license
+        env:
+          SIGNPATH_API_TOKEN: ${{ secrets.SIGNPATH_API_TOKEN }}
+          SIGNPATH_LICENSE_APPROVED: ${{ vars.SIGNPATH_LICENSE_APPROVED }}
+        run: |
+          foreach ($name in @('SIGNPATH_ORGANIZATION_ID', 'SIGNPATH_PROJECT_SLUG', 'SIGNPATH_SIGNING_POLICY_SLUG', 'SIGNPATH_CERTIFICATE_SUBJECT', 'SIGNPATH_API_TOKEN')) {
+            if ([string]::IsNullOrWhiteSpace([Environment]::GetEnvironmentVariable($name))) { throw ('Missing signing configuration: ' + $name) }
+          }
+          if ($env:SIGNPATH_LICENSE_APPROVED -cne 'true') { throw 'An authorized maintainer must approve the OSI license before enabling signing.' }
+          if (!(Test-Path LICENSE -PathType Leaf) -and !(Test-Path LICENSE.md -PathType Leaf) -and !(Test-Path LICENSE.txt -PathType Leaf)) { throw 'A root open source LICENSE is required.' }
+      - name: Download runtime built in this workflow
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          artifact-ids: ${{ needs.build.outputs.runtime_artifact_id }}
+          path: dist
+          merge-multiple: true
+      - name: Download matching source archive and generated icon
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          artifact-ids: ${{ needs.build.outputs.source_artifact_id }}
+          path: build/source-artifact
+          merge-multiple: true
+      - name: Read version from built binary
+        id: version
+        run: |
+          $info = (Get-Item -LiteralPath dist/ADAMO-GT.exe).VersionInfo
+          $version = [Version]$info.FileVersion
+          if ($info.ProductName -cne 'ADAMO GT' -or $info.ProductVersion -cne $version.ToString(4)) { throw 'Invalid application metadata.' }
+          'product=' + $version.ToString(4) >> $env:GITHUB_OUTPUT
+          'release=' + $version.ToString(3) >> $env:GITHUB_OUTPUT
+      - name: Upload only our inner executable for signing
+        id: inner
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: adamo-gt-unsigned-inner
+          path: dist/ADAMO-GT.exe
+          archive: true
+          if-no-files-found: error
+          retention-days: 7
+      - name: Request inner signature (manual SignPath approval)
+        uses: signpath/github-action-submit-signing-request@f6d04783b4569d051e0c80105fe66e82819d0092 # v3
+        with:
+          api-token: ${{ secrets.SIGNPATH_API_TOKEN }}
+          organization-id: ${{ vars.SIGNPATH_ORGANIZATION_ID }}
+          project-slug: ${{ vars.SIGNPATH_PROJECT_SLUG }}
+          signing-policy-slug: ${{ vars.SIGNPATH_SIGNING_POLICY_SLUG }}
+          artifact-configuration-slug: adamo-gt-inner-v1
+          github-artifact-id: ${{ steps.inner.outputs.artifact-id }}
+          wait-for-completion: true
+          wait-for-completion-timeout-in-seconds: 1800
+          output-artifact-directory: build/signed-inner
+          parameters: |
+            productVersion: ${{ toJSON(steps.version.outputs.product) }}
+      - name: Verify inner signature and rebuild wrapper payload
+        env:
+          PRODUCT_VERSION: ${{ steps.version.outputs.product }}
+        run: |
+          & ./scripts/Test-SignedBinary.ps1 -Path build/signed-inner/ADAMO-GT.exe -ExpectedSubject $env:SIGNPATH_CERTIFICATE_SUBJECT -ExpectedVersion $env:PRODUCT_VERSION
+          Copy-Item -LiteralPath build/signed-inner/ADAMO-GT.exe -Destination dist/ADAMO-GT.exe -Force
+          Copy-Item -LiteralPath build/source-artifact/ADAMO-GT.ico -Destination src/ADAMO-GT.ico
+          & ./build-single-file.ps1 -OutputDirectory ./build/unsigned-wrapper
+      - name: Upload only our wrapper for signing
+        id: wrapper
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: adamo-gt-unsigned-wrapper
+          path: build/unsigned-wrapper/*-Single.exe
+          archive: true
+          if-no-files-found: error
+          retention-days: 7
+      - name: Request wrapper signature (manual SignPath approval)
+        uses: signpath/github-action-submit-signing-request@f6d04783b4569d051e0c80105fe66e82819d0092 # v3
+        with:
+          api-token: ${{ secrets.SIGNPATH_API_TOKEN }}
+          organization-id: ${{ vars.SIGNPATH_ORGANIZATION_ID }}
+          project-slug: ${{ vars.SIGNPATH_PROJECT_SLUG }}
+          signing-policy-slug: ${{ vars.SIGNPATH_SIGNING_POLICY_SLUG }}
+          artifact-configuration-slug: adamo-gt-wrapper-v1
+          github-artifact-id: ${{ steps.wrapper.outputs.artifact-id }}
+          wait-for-completion: true
+          wait-for-completion-timeout-in-seconds: 1800
+          output-artifact-directory: build/signed-wrapper
+          parameters: |
+            productVersion: ${{ toJSON(steps.version.outputs.product) }}
+            releaseVersion: ${{ toJSON(steps.version.outputs.release) }}
+      - name: Verify and package signed release
+        env:
+          PRODUCT_VERSION: ${{ steps.version.outputs.product }}
+          RELEASE_VERSION: ${{ steps.version.outputs.release }}
+        run: |
+          $wrapper = 'build/signed-wrapper/ADAMO-GT-' + $env:RELEASE_VERSION + '-Single.exe'
+          & ./scripts/Test-SignedBinary.ps1 -Path $wrapper -ExpectedSubject $env:SIGNPATH_CERTIFICATE_SUBJECT -ExpectedVersion $env:PRODUCT_VERSION
+          New-Item -ItemType Directory -Path build/signed-release -Force | Out-Null
+          $releasePath = Join-Path $PWD 'build/signed-release'
+          $downloadName = 'ADAMO-GT-' + $env:RELEASE_VERSION
+          Copy-Item -LiteralPath $wrapper -Destination (Join-Path $releasePath ($downloadName + '.exe'))
+          Compress-Archive -LiteralPath (Join-Path $releasePath ($downloadName + '.exe')) -DestinationPath (Join-Path $releasePath ($downloadName + '.zip'))
+          Copy-Item -LiteralPath build/source-artifact/ADAMO-GT-source.zip -Destination (Join-Path $releasePath ($downloadName + '-source.zip'))
+          Add-Type -AssemblyName System.IO.Compression.FileSystem
+          [IO.Compression.ZipFile]::CreateFromDirectory((Join-Path $PWD 'dist'), (Join-Path $releasePath ($downloadName + '-Windows-x64.zip')))
+          Get-ChildItem -LiteralPath $releasePath -File | Sort-Object Name | ForEach-Object {
+            (Get-FileHash -LiteralPath $_.FullName -Algorithm SHA256).Hash.ToLowerInvariant() + '  ' + $_.Name
+          } | Set-Content -LiteralPath (Join-Path $releasePath ('SHA256SUMS-' + $env:RELEASE_VERSION + '.txt')) -Encoding ASCII
+      - name: Upload verified signed files for release review
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: adamo-gt-signed-release
+          path: build/signed-release/
+          archive: true
+          if-no-files-found: error
+          retention-days: 14

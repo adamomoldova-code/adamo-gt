@@ -1,0 +1,14 @@
+{
+  "notice": "Unmodified third-party libraries. Corresponding source is available at the URLs below. MPL-2.0 text: LibreHardwareMonitor.LICENSE.txt. Embedded PawnIO module source is supplied in PawnIO.Modules-0.1.6-source.zip. No driver installer is bundled.",
+  "components": [
+    {"name":"LibreHardwareMonitorLib", "version":"0.9.6", "license":"MPL-2.0", "source":"https://github.com/LibreHardwareMonitor/LibreHardwareMonitor/tree/v0.9.6"},
+    {"name":"BlackSharp.Core", "version":"1.0.7", "copyright":"Florian K.", "license":"MPL-2.0", "source":"https://github.com/Blacktempel/BlackSharp/tree/c70b735c6cec123ee8a046ac4a0bc6c606f52cf0"},
+    {"name":"DiskInfoToolkit", "version":"1.1.2", "copyright":"Florian K.", "license":"MPL-2.0", "source":"https://github.com/Blacktempel/DiskInfoToolkit/tree/25319eae5781e75bcf141e844ceab2afe94d40ea"},
+    {"name":"RAMSPDToolkit-NDD", "version":"1.4.2", "copyright":"Florian K.", "license":"MPL-2.0", "source":"https://github.com/Blacktempel/RAMSPDToolkit/tree/3b47b960e0830fef344624ad5e389675d5f0a1ce"},
+    {"name":"HidSharp", "version":"2.6.4", "copyright":"James F. Bellinger", "license":"Apache-2.0", "source":"https://software.seekye.com/hidsharp"},
+    {"name":"PawnIO.Modules (embedded)", "version":"0.1.6", "license":"LGPL-2.1", "source":"https://github.com/namazso/PawnIO.Modules/tree/0.1.6"},
+    {"name":"Microsoft System.* / Microsoft.Bcl.* runtime libraries", "license":"MIT", "source":"https://github.com/dotnet/runtime"},
+    {"name":"smartmontools standalone helper", "version":"7.5", "license":"GPL-2.0-or-later", "source":"https://github.com/smartmontools/smartmontools/releases/tag/RELEASE_7_5", "bundledSource":"tools/smartmontools/smartmontools-7.5.tar.gz", "notice":"Unmodified smartctl.exe and drivedb.h. Original source and license included in tools/smartmontools."},
+    {"name":"Microsoft DiskSpd standalone helper", "version":"2.3", "license":"MIT", "source":"https://github.com/microsoft/diskspd/tree/5e7025bfc9d1364f185d4c30963d7ac79195435e", "notice":"Source build with pinned provenance in tools/diskspd/SOURCE.json. Original source archive and build recipe supplied in vendor/diskspd-2.3 of the source distribution. Do not re-sign this upstream helper with the ADAMO GT Foundation certificate."}
+  ]
+}
