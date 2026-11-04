@@ -122,6 +122,7 @@ namespace PcPulse
                     { "height", PositiveInteger(screen.Height) },
                     { "refresh_hz", Positive(screen.RefreshHz) },
                     { "is_internal", true },
+                    { "is_touch", screen.IsTouch },
                     { "matrix_type", Known(screen.MatrixType) },
                     // Rated panel specification, not measured light output.
                     { "brightness_nits", Positive(screen.BrightnessNits) }

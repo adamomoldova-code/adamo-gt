@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
@@ -36,7 +36,7 @@ namespace PcPulseTests
                 Run("CRM product data excludes private identifiers and marks uncertain measurements", CrmProductDraftTests.Run);
                 Run("Legacy CRM dialog remains compatible for existing tests", CrmProductDraftTests.RunUi);
                 Run("Minimal CRM client authenticates, validates responses and safely resumes", CrmQuickIntakeClientTests.Run);
-                Run("Minimal CRM dialog asks only password, quantity and condition", CrmQuickIntakeWindowTests.Run);
+                Run("Minimal CRM dialog asks only quantity and condition", CrmQuickIntakeWindowTests.Run);
                 Run("Automatic CRM payload includes product specs without private identifiers", CrmQuickPayloadTests.Run);
                 Run("Minimal CRM flow sends the frozen first page through the actual v2 client", CrmQuickFlowTests.Run);
                 Run("Dashboard CRM action uses inventory and does not activate other buttons", CrmDashboardTests.Run);
@@ -170,7 +170,7 @@ namespace PcPulseTests
             var app = new Application { ShutdownMode = ShutdownMode.OnExplicitShutdown };
             Run("Privacy dialog saves opt-in, opt-out and storage failures safely", PrivacySettingsTests.RunUi);
             Run("CRM dialog handles quantity, reviewed photo and pending operations", CrmProductDraftTests.RunUi);
-            Run("Minimal CRM dialog asks only password, quantity and condition", CrmQuickIntakeWindowTests.Run);
+            Run("Minimal CRM dialog asks only quantity and condition", CrmQuickIntakeWindowTests.Run);
             Run("Minimal CRM flow sends the frozen first page through the actual v2 client", CrmQuickFlowTests.Run);
             Run("Dashboard CRM action is isolated and waits for completed inventory", CrmDashboardTests.Run);
             Run("CRM screenshot captures the real first page without other windows", CrmDashboardCaptureTests.Run);

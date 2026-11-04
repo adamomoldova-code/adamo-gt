@@ -566,7 +566,7 @@ namespace PcPulse
             };
             snapshot.Disks = inventory.Disks.Select(disk => new DiskSnapshot { Index = disk.Index, StorageIdentity = disk.StorageIdentity, PersistentHardwareId = disk.PersistentHardwareId, Name = disk.Name, SizeBytes = disk.SizeBytes, MediaType = disk.MediaType, Volumes = disk.Volumes, TestVolumeRoot = disk.TestVolumeRoot, HealthPercent = disk.HealthPercent, PowerOnHours = disk.PowerOnHours, CriticalWarning = disk.CriticalWarning, SmartPassed = disk.SmartPassed, SmartStatus = disk.SmartStatus, SmartSource = disk.SmartSource }).ToList();
             snapshot.Gpus = inventory.Gpus.Select(gpu => new GpuSnapshot { Name = gpu.Name, PersistentHardwareId = gpu.PersistentHardwareId, MemoryBytes = gpu.MemoryBytes, MemoryKind = gpu.MemoryKind, AdapterIndex = gpu.AdapterIndex, AdapterLuidLow = gpu.AdapterLuidLow, AdapterLuidHigh = gpu.AdapterLuidHigh, SharedMemoryBytes = gpu.SharedMemoryBytes, IsIntegrated = gpu.IsIntegrated }).ToList();
-            snapshot.Screens = inventory.Screens.Select(screen => new ScreenSnapshot { Name = screen.Name, InstanceName = screen.InstanceName, Width = screen.Width, Height = screen.Height, RefreshHz = screen.RefreshHz, IsInternal = screen.IsInternal, MatrixType = screen.MatrixType, BrightnessNits = screen.BrightnessNits, Source = screen.Source }).ToList();
+            snapshot.Screens = inventory.Screens.Select(screen => new ScreenSnapshot { Name = screen.Name, InstanceName = screen.InstanceName, Width = screen.Width, Height = screen.Height, RefreshHz = screen.RefreshHz, IsInternal = screen.IsInternal, IsTouch = screen.IsTouch, MatrixType = screen.MatrixType, BrightnessNits = screen.BrightnessNits, Source = screen.Source }).ToList();
             return snapshot;
         }
 

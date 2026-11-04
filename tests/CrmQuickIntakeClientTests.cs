@@ -30,7 +30,7 @@ namespace PcPulseTests
                 Login(client); var value = Submission(); value.Quantity = 3;
                 var result = client.SubmitAsync(value, CancellationToken.None).GetAwaiter().GetResult();
                 var session = Parse(transport.Calls[0].Body); var sent = transport.Calls[1]; var body = Parse(sent.Body);
-                Require(session.Keys.OrderBy(x => x).SequenceEqual(new[] { "client_id", "password" }), "session has only password and random client id");
+                Require(session.Keys.OrderBy(x => x).SequenceEqual(new[] { "client_id" }), "office session has only random client id and no password");
                 Guid id; Require(Guid.TryParse((string)session["client_id"], out id) && id != Guid.Empty, "random installation identity");
                 Require(transport.Calls.All(c => c.Uri.GetLeftPart(UriPartial.Authority) == "https://crm.adamo.md"), "fixed trusted HTTPS origin");
                 Require(transport.Calls[0].Uri.AbsolutePath == "/v1/adamo-gt/v2/session" && sent.Uri.AbsolutePath == "/v1/adamo-gt/v2/product-intakes", "v2 endpoints only");
@@ -224,7 +224,7 @@ namespace PcPulseTests
                 ScreenshotBase64 = Convert.ToBase64String(new byte[] { 137, 80, 78, 71, 13, 10, 26, 10, 0, 0, 0, 13, 73, 72, 68, 82, 0, 0, 4, 176, 0, 0, 2, 0 }) };
         }
         private static string Temp() { return Path.Combine(Path.GetTempPath(), "AdamoQuickCrmTests", Guid.NewGuid().ToString("N")); }
-        private static void Login(CrmQuickIntakeClient client) { client.LoginAsync("fixture-password", CancellationToken.None).GetAwaiter().GetResult(); }
+        private static void Login(CrmQuickIntakeClient client) { client.LoginAsync(CancellationToken.None).GetAwaiter().GetResult(); }
         private static Dictionary<string, object> Parse(string body) { return (Dictionary<string, object>)CrmQuickIntakeClient.Json().DeserializeObject(body); }
         private static void Require(bool condition, string reason) { if (!condition) { throw new InvalidOperationException(reason); } }
         private static T RequireThrows<T>(Action action, string reason) where T : Exception

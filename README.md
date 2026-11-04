@@ -6,9 +6,9 @@ ADAMO GT displays CPU, RAM, GPU, storage, battery, display and model information
 
 Project and downloads: [ADAMO.MD](https://adamo.md/ro/blog/adamo-gt-verificare-laptop-pc).
 
-## Version 2.7.2 — signing preparation
+## Version 2.7.4
 
-This source builds the ADAMO GT 2.7.2 signing-preparation candidate with the simplified office CRM flow described below. The published download is still unsigned 2.7.1. No SignPath Foundation approval or signed release exists yet.
+This source builds ADAMO GT 2.7.4: office-only CRM submission without a password, detected Touch on product labels after resolution, and green battery/SSD health indicators above 60%. SignPath Foundation approval is still pending; this release is unsigned.
 
 On first graphical use, 2.7.2 presents the embedded privacy policy. Automatic CRM availability checks are off until explicitly enabled and saved. Change this choice in **Датчики → Confidențialitate**; local diagnostics continue to work with CRM disabled. Missing, corrupt or obsolete preferences leave automatic CRM checks disabled.
 
@@ -18,9 +18,9 @@ The original ADAMO GT code, documentation and original bundled artwork are avail
 
 ## CRM
 
-The **CRM** button appears only after the operator enables automatic CRM checks and the server confirms office access. Click it, enter the integration password, choose quantity and condition, then click **Trimite și imprimă**. The server must have the office IP, credentials, warehouse and printer configured; without that confirmation the button stays hidden. Local diagnostics remain available.
+The **CRM** button appears only after the operator enables automatic CRM checks and the server confirms office access. Click it, choose quantity and condition, then click **Trimite și imprimă**. The server must have the office IP, dedicated integration actor, warehouse and printer configured; without that confirmation the button stays hidden. Local diagnostics remain available.
 
-The app automatically prepares hardware specifications and a real screenshot of its first page before the password dialog opens. It captures the application content, including visible status text, without the desktop, other windows or the password. Structured data omits computer names, serial identifiers and raw logs; unknown hardware values remain unknown. External or unclassified disks and external displays are omitted from the automatic product data. For quantity above one, the same configuration is applied to all units while the screenshot describes this computer.
+The app automatically prepares hardware specifications and a real screenshot of its first page before the CRM dialog opens. It captures the application content, including visible status text, without the desktop or other windows. Structured data omits computer names, serial identifiers and raw logs; unknown hardware values remain unknown. External or unclassified disks and external displays are omitted from the automatic product data. For quantity above one, the same configuration is applied to all units while the screenshot describes this computer.
 
 CRM creates a draft product and AD inventory codes using its configured warehouse, attaches the specification screenshot and queues the existing stickers on its configured printer. The screenshot is not automatically selected as the cover. Missing product details can be completed later in CRM; this action does not publish the product to a website or marketplace.
 

@@ -128,18 +128,17 @@ namespace PcPulse
             OpenJournal();
         }
 
-        public virtual async Task LoginAsync(string password, CancellationToken token)
+        public virtual async Task LoginAsync(CancellationToken token)
         {
             BeginOperation();
             bool entered = false;
             try
             {
                 token.ThrowIfCancellationRequested();
-                if (String.IsNullOrEmpty(password)) { throw new CrmException("Введите пароль CRM."); }
                 entered = await operation.WaitAsync(0, token);
                 if (!entered) { throw new CrmException("Запрос CRM уже выполняется."); }
                 bearer = null; expiresAtUtc = DateTime.MinValue;
-                var response = await Request("/v1/adamo-gt/v2/session", Json().Serialize(new { password = password, client_id = clientId }), null, null, token);
+                var response = await Request("/v1/adamo-gt/v2/session", Json().Serialize(new { client_id = clientId }), null, null, token);
                 CheckDisposed();
                 var data = Parse(response.Body);
                 string candidate = Text(data, "token");
@@ -147,7 +146,7 @@ namespace PcPulse
                 if (String.IsNullOrWhiteSpace(candidate) || candidate.Length > 4096 || candidate.IndexOfAny(new[] { '\r', '\n' }) >= 0
                     || Text(data, "token_type") != "Bearer"
                     || !Int32.TryParse(Text(data, "expires_in"), NumberStyles.None, CultureInfo.InvariantCulture, out seconds) || seconds < 1 || seconds > 600)
-                    throw new CrmException("CRM не подтвердил вход. Повторите ввод пароля.");
+                    throw new CrmException("CRM не подтвердил сессию. Повторите попытку.");
                 bearer = candidate; expiresAtUtc = DateTime.UtcNow.AddSeconds(seconds);
             }
             finally { if (entered) { operation.Release(); } EndOperation(); }
@@ -160,7 +159,7 @@ namespace PcPulse
             try
             {
                 token.ThrowIfCancellationRequested();
-                if (!IsAuthenticated) { throw new CrmException("Введите пароль CRM ещё раз. Сохранённая отправка останется доступной.", 401); }
+                if (!IsAuthenticated) { throw new CrmException("Повторите подключение к CRM. Сохранённая отправка останется доступной.", 401); }
                 entered = await operation.WaitAsync(0, token);
                 if (!entered) { throw new CrmException("Отправка уже выполняется."); }
                 string body = BuildBody(submission);

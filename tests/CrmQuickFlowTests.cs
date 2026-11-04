@@ -40,9 +40,7 @@ namespace PcPulseTests
                 using (var client = new CrmQuickIntakeClient(transport, directory))
                 {
                     dialog = new CrmQuickIntakeWindow(prepared, client);
-                    Field<PasswordBox>(dialog, "password").Password = "fixture-only-password";
-                    Drain(Continue(dialog));
-                    Require(client.IsAuthenticated && transport.Requests == 1, "One password step authenticates the actual v2 client");
+                    Require(!client.IsAuthenticated && transport.Requests == 0, "Opening the dialog requires no password or network request");
                     Field<TextBox>(dialog, "quantity").Text = "2";
                     Field<ComboBox>(dialog, "condition").SelectedIndex = 2;
                     Drain(Continue(dialog));
@@ -82,7 +80,7 @@ namespace PcPulseTests
                 if (uri.AbsolutePath.EndsWith("/session", StringComparison.Ordinal))
                 {
                     var login = Json().Deserialize<Dictionary<string, object>>(body);
-                    Require(login.Count == 2 && login.ContainsKey("password") && login.ContainsKey("client_id") && bearer == null && key == null, "Password-only session has no staff username");
+                    Require(login.Count == 1 && !login.ContainsKey("password") && login.ContainsKey("client_id") && bearer == null && key == null, "Office-only session has no password or staff username");
                     return Task.FromResult(new CrmHttpResponse { StatusCode = 200, Body = "{\"token\":\"fixture-token\",\"token_type\":\"Bearer\",\"expires_in\":600}" });
                 }
                 Require(uri.AbsolutePath == "/v1/adamo-gt/v2/product-intakes" && bearer == "fixture-token", "Scoped session is used for intake");

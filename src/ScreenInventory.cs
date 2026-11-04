@@ -13,6 +13,7 @@ namespace PcPulse
         {
             List<ScreenSnapshot> result = new List<ScreenSnapshot>();
             HashSet<string> known = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            HashSet<string> touchDisplays = ScreenTouchInventory.ReadTouchDisplays();
             for (uint index = 0; index < 32; index++)
             {
                 DisplayDevice adapter = NewDevice();
@@ -42,6 +43,7 @@ namespace PcPulse
                     }
                     Dictionary<string, object> connection = UniqueMatch(connections, key);
                     if (connection != null) { screen.IsInternal = InternalConnection(HardwareDetailsInventory.Unsigned(connection, "VideoOutputTechnology")); }
+                    if (screen.IsInternal == true && touchDisplays.Contains(adapter.DeviceName)) { screen.IsTouch = true; }
                     result.Add(screen);
                     found = true;
                 }
@@ -50,6 +52,9 @@ namespace PcPulse
                     result.Add(new ScreenSnapshot { Name = "Экран " + (result.Count + 1), InstanceName = adapter.DeviceName, Width = width, Height = height, RefreshHz = refresh, Source = "Текущий режим Windows; EDID недоступен" });
                 }
             }
+            // The global Windows metric is unambiguous only with one internal display.
+            if (result.Count == 1 && result[0].IsInternal == true && ScreenTouchInventory.HasIntegratedTouch())
+            { result[0].IsTouch = true; }
             return result.OrderByDescending(screen => screen.IsInternal == true).ToList();
         }
 

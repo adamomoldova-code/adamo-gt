@@ -16,8 +16,8 @@ using System.Windows.Media.Imaging;
 [assembly: AssemblyTitle("ADAMO GT")]
 [assembly: AssemblyProduct("ADAMO GT")]
 [assembly: AssemblyDescription("Показатели компьютера на одном экране")]
-[assembly: AssemblyVersion("2.7.2.0")]
-[assembly: AssemblyFileVersion("2.7.2.0")]
+[assembly: AssemblyVersion("2.7.4.0")]
+[assembly: AssemblyFileVersion("2.7.4.0")]
 
 namespace PcPulse
 {

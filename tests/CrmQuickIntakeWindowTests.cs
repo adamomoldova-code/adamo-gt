@@ -44,10 +44,7 @@ namespace PcPulseTests
             {
                 var window = new CrmQuickIntakeWindow(Prepared(), client);
                 Require(client.LoginCalls == 0 && client.SubmitCalls == 0, "Opening the compact form makes no network request or product");
-                AssertControls(window, false);
-                Drain(Continue(window)); Require(client.LoginCalls == 0, "An empty password does not call CRM");
-                SignIn(window); AssertControls(window, true);
-                Require(Field<PasswordBox>(window, "password").Password.Length == 0, "Password is cleared after login");
+                AssertControls(window, true);
                 Require(Field<TextBox>(window, "quantity").Text == "1" && Field<ComboBox>(window, "condition").SelectedIndex == -1,
                     "Quantity defaults to one and condition requires an explicit choice");
                 Drain(Continue(window)); Require(client.SubmitCalls == 0, "No product is sent without a condition");
@@ -90,15 +87,15 @@ namespace PcPulseTests
                 var pending = Prepared(); pending.Quantity = 3; pending.Condition = "like_new"; pending.ScreenshotBase64 = "original-capture";
                 client.Restore(pending);
                 var window = new CrmQuickIntakeWindow(Prepared(), client);
-                AssertControls(window, false); SignIn(window);
+                AssertControls(window, true);
                 Require(Field<TextBox>(window, "quantity").Text == "3" && Field<ComboBox>(window, "condition").SelectedIndex == 1,
                     "A saved send restores its original quantity and condition");
                 Require(!Field<TextBox>(window, "quantity").IsEnabled && !Field<ComboBox>(window, "condition").IsEnabled,
                     "Restored submissions cannot be edited");
                 client.SendError = new CrmException("Expired", 401); Drain(Continue(window));
-                AssertControls(window, false);
+                AssertControls(window, true);
                 Require(ReferenceEquals(client.Pending, pending), "An expired session retains the pending operation");
-                client.SendError = null; SignIn(window); Drain(Continue(window));
+                client.SendError = null; Drain(Continue(window));
                 Require(client.LoginCalls == 2 && ReferenceEquals(client.LastSubmission, pending) && client.LastSubmission.ScreenshotBase64 == "original-capture",
                     "Reauthentication resumes the exact saved operation and original capture");
                 window.Close(); Pump();
@@ -109,20 +106,20 @@ namespace PcPulseTests
         {
             using (var client = new FakeClient())
             {
-                client.LoginError = new CrmException("PRIVATE_LOGIN", 401);
-                var window = new CrmQuickIntakeWindow(Prepared(), client); SignIn(window);
-                Require(Field<TextBlock>(window, "status").Text == "Parola nu este corectă." && Field<Button>(window, "primary").IsEnabled,
-                    "Wrong password gives a short error and permits retry");
-                AssertControls(window, false);
+                client.LoginError = new CrmException("PRIVATE_LOGIN", 403);
+                var window = new CrmQuickIntakeWindow(Prepared(), client);
+                Field<ComboBox>(window, "condition").SelectedIndex = 2;
+                Drain(Continue(window));
+                Require(Field<TextBlock>(window, "status").Text == "CRM este disponibil doar din oficiu." && Field<Button>(window, "primary").IsEnabled,
+                    "Office denial gives a short error and permits retry without asking for a password");
+                AssertControls(window, true);
                 client.LoginError = null; client.LoginGate = new TaskCompletionSource<bool>();
-                Field<PasswordBox>(window, "password").Password = "test-only";
                 Task request = Continue(window); Drain(Continue(window));
-                Require(client.LoginCalls == 2, "A pending login cannot be started twice");
+                Require(client.LoginCalls == 2 && client.SubmitCalls == 0, "A pending office session cannot be started twice");
                 window.Close(); Pump();
-                Require(client.LastToken.IsCancellationRequested && Field<PasswordBox>(window, "password").Password.Length == 0,
-                    "Closing cancels a pending login and clears the password");
+                Require(client.LastToken.IsCancellationRequested, "Closing cancels a pending session");
                 client.LoginGate.SetResult(true); Drain(request);
-                Require(!Field<bool>(window, "signedIn") && client.Disposed, "Late login completion cannot reopen the selection step");
+                Require(client.SubmitCalls == 0 && client.Disposed, "Late session completion cannot submit from a closed dialog");
             }
         }
 
@@ -130,7 +127,7 @@ namespace PcPulseTests
         {
             using (var client = new FakeClient())
             {
-                var window = new CrmQuickIntakeWindow(Prepared(), client); SignIn(window);
+                var window = new CrmQuickIntakeWindow(Prepared(), client);
                 Field<ComboBox>(window, "condition").SelectedIndex = 2;
                 client.SendGate = new TaskCompletionSource<CrmQuickIntakeResult>();
                 Task request = Continue(window); window.Close(); Pump();
@@ -145,7 +142,7 @@ namespace PcPulseTests
             using (var client = new FakeClient())
             {
                 var window = new CrmQuickIntakeWindow(Prepared(), client);
-                if (signedIn) { SignIn(window); Field<ComboBox>(window, "condition").SelectedIndex = 2; }
+                if (signedIn) { Field<ComboBox>(window, "condition").SelectedIndex = 2; }
                 var content = (FrameworkElement)window.Content; window.Content = null;
                 var host = new Border { Child = content, Width = size.Width, Height = size.Height, Background = window.Background, UseLayoutRounding = true };
                 System.Windows.Documents.TextElement.SetFontFamily(host, window.FontFamily);
@@ -153,9 +150,7 @@ namespace PcPulseTests
                 System.Windows.Documents.TextElement.SetForeground(host, window.Foreground);
                 TextOptions.SetTextFormattingMode(host, TextFormattingMode.Display);
                 host.Measure(size); host.Arrange(new Rect(new Point(), size)); host.UpdateLayout();
-                foreach (FrameworkElement element in signedIn
-                    ? new FrameworkElement[] { Field<TextBox>(window, "quantity"), Field<ComboBox>(window, "condition"), Field<Button>(window, "primary"), Field<Button>(window, "close") }
-                    : new FrameworkElement[] { Field<PasswordBox>(window, "password"), Field<Button>(window, "primary"), Field<Button>(window, "close") })
+                foreach (FrameworkElement element in new FrameworkElement[] { Field<TextBox>(window, "quantity"), Field<ComboBox>(window, "condition"), Field<Button>(window, "primary"), Field<Button>(window, "close") })
                 {
                     Rect bounds = element.TransformToAncestor(host).TransformBounds(new Rect(element.RenderSize));
                     Require(bounds.Width > 30 && bounds.Height >= 30 && bounds.Top >= 0 && bounds.Bottom <= size.Height && bounds.Left >= 0 && bounds.Right <= size.Width,
@@ -180,13 +175,12 @@ namespace PcPulseTests
         private static void AssertControls(CrmQuickIntakeWindow window, bool signedIn)
         {
             var controls = new List<Control>(); CollectLogical((DependencyObject)window.Content, controls);
-            Require(Count<TextBox>(controls) == 1 && Count<PasswordBox>(controls) == 1 && Count<ComboBox>(controls) == 1 && Count<Button>(controls) == 2 && Count<CheckBox>(controls) == 0,
-                "The entire form contains only password, quantity, condition, primary action and cancel");
-            Require(Field<StackPanel>(window, "loginPanel").Visibility == (signedIn ? Visibility.Collapsed : Visibility.Visible)
-                && Field<StackPanel>(window, "selectionPanel").Visibility == (signedIn ? Visibility.Visible : Visibility.Collapsed),
-                "Each step exposes only its required inputs");
-            Require(Convert.ToString(Field<Button>(window, "primary").Content) == (signedIn ? "Trimite și imprimă" : "Continuă"),
-                "The same primary button advances the two steps");
+            Require(Count<TextBox>(controls) == 1 && Count<PasswordBox>(controls) == 0 && Count<ComboBox>(controls) == 1 && Count<Button>(controls) == 2 && Count<CheckBox>(controls) == 0,
+                "The entire form contains only quantity, condition, primary action and cancel");
+            Require(Field<StackPanel>(window, "selectionPanel").Visibility == Visibility.Visible,
+                "Quantity and condition are available immediately without a login step");
+            Require(Convert.ToString(Field<Button>(window, "primary").Content) == "Trimite și imprimă",
+                "The primary action always sends and prints");
         }
         private static void CollectLogical(DependencyObject root, List<Control> controls)
         {
@@ -216,7 +210,7 @@ namespace PcPulseTests
             internal FakeClient() : base(new FakeTransport(), Path.Combine(Path.GetTempPath(), "ADAMO-GT-CrmQuick-UI", Guid.NewGuid().ToString("N"))) { }
             public override bool IsAuthenticated { get { return Authenticated; } }
             internal void Restore(CrmQuickSubmission pending) { Pending = pending; }
-            public override async Task LoginAsync(string password, CancellationToken token)
+            public override async Task LoginAsync(CancellationToken token)
             {
                 LoginCalls++; LastToken = token;
                 if (LoginError != null) { throw LoginError; }
@@ -237,8 +231,6 @@ namespace PcPulseTests
         { return new CrmQuickSubmission { ClientIntakeId = Guid.NewGuid().ToString(), AppVersion = "2.7.0", CapturedAt = "2026-10-20T00:00:00Z", ScreenshotBase64 = "frozen-test-capture", DetectedSpecs = new Dictionary<string, object>() }; }
         private static CrmQuickIntakeResult Complete()
         { return new CrmQuickIntakeResult { ProductId = "42", IntakeId = "17", ImageStatus = "attached", PrintStatus = "queued", Completed = true }; }
-        private static void SignIn(CrmQuickIntakeWindow window)
-        { Field<PasswordBox>(window, "password").Password = "test-only"; Drain(Continue(window)); }
         private static Task Continue(CrmQuickIntakeWindow window)
         { return (Task)window.GetType().GetMethod("ContinueAsync", BindingFlags.NonPublic | BindingFlags.Instance).Invoke(window, null); }
         private static T Field<T>(object target, string name)

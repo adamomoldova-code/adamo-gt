@@ -112,6 +112,7 @@ namespace PcPulse
         public int? Height;
         public double? RefreshHz;
         public bool? IsInternal;
+        public bool? IsTouch;
         public string MatrixType = "Не подтверждён";
         public double? BrightnessNits;
         public string Source = "Windows / EDID";

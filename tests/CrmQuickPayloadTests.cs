@@ -16,6 +16,7 @@ namespace PcPulseTests
             VerifyPeripheralFilters();
             VerifyAbsentAndMultipleBatteries();
             VerifyBoundsAndAllowlist();
+            VerifyTouchProjection();
             Console.WriteLine("PASS CRM quick payload: hardware allowlist, unknowns, numeric validity, detached copy and external-device filtering");
         }
 
@@ -169,9 +170,39 @@ namespace PcPulseTests
             Keys(Object(result, "ram"), "installed_bytes,type,rate,clock_mhz,module_count,slot_count,free_slots,maximum_bios_bytes,maximum_manufacturer_bytes");
             Keys(Items(result, "storage")[0], "name,media_type,size_bytes,health_percent,power_on_hours,smart_passed");
             Keys(Items(result, "gpus")[0], "name,is_integrated,memory_bytes,shared_memory_bytes");
-            Keys(Items(result, "displays")[0], "name,width,height,refresh_hz,is_internal,matrix_type,brightness_nits");
+            Keys(Items(result, "displays")[0], "name,width,height,refresh_hz,is_internal,is_touch,matrix_type,brightness_nits");
             Keys(Object(result, "battery"), "present,charge_percent,health_percent,design_wh,full_charge_wh,cycle_count,runtime_min_hours,runtime_max_hours,runtime_is_estimate");
             Keys(Items(result, "ports")[0], "name,count,optional");
+        }
+
+        private static void VerifyTouchProjection()
+        {
+            foreach (bool? touch in new bool?[] { true, false, null })
+            {
+                var snapshot = new Snapshot();
+                snapshot.Screens.Add(new ScreenSnapshot { IsInternal = true, IsTouch = touch, Width = 1920, Height = 1080 });
+                snapshot.Screens.Add(new ScreenSnapshot { IsInternal = false, IsTouch = true, Width = 3840, Height = 2160 });
+                var displays = Items(CrmQuickPayload.Build(snapshot, null), "displays");
+                Require(displays.Count == 1 && System.Object.Equals(displays[0]["is_touch"], touch),
+                    "Touch is tied to the internal display; external touch and unknown readings are not guessed");
+            }
+            IntPtr monitor = new IntPtr(1);
+            Require(ScreenTouchInventory.IsTouchPointer(3, 10, 1, monitor), "Windows touch digitizers are recognized");
+            Require(ScreenTouchInventory.IntegratedTouch(0x81, 10)
+                && !ScreenTouchInventory.IntegratedTouch(0x82, 10)
+                && !ScreenTouchInventory.IntegratedTouch(0x84, 10)
+                && !ScreenTouchInventory.IntegratedTouch(1, 10)
+                && !ScreenTouchInventory.IntegratedTouch(0x81, 0),
+                "Only a ready integrated touchscreen qualifies for the single-panel fallback");
+            Require(!ScreenTouchInventory.IsTouchPointer(1, 10, 1, monitor)
+                && !ScreenTouchInventory.IsTouchPointer(2, 10, 1, monitor)
+                && !ScreenTouchInventory.IsTouchPointer(4, 10, 1, monitor), "Pens and touchpads are not screens with Touch");
+            Require(!ScreenTouchInventory.IsTouchPointer(3, 0, 1, monitor)
+                && !ScreenTouchInventory.IsTouchPointer(3, 10, 0, monitor)
+                && !ScreenTouchInventory.IsTouchPointer(3, 10, 1, IntPtr.Zero), "Unmapped or injected input does not establish Touch");
+            Require(System.Runtime.InteropServices.Marshal.SizeOf(typeof(ScreenTouchInventory.PointerDeviceInfo)) == 1080
+                && System.Runtime.InteropServices.Marshal.OffsetOf(typeof(ScreenTouchInventory.PointerDeviceInfo), "Monitor").ToInt32() == 24,
+                "Pointer device structure matches the Windows x64 ABI");
         }
 
         private static Snapshot Sample()

@@ -9,20 +9,19 @@ using System.Windows.Media;
 
 namespace PcPulse
 {
-    // The desktop collects only the operator's password, quantity and condition.
+    // The desktop collects only quantity and condition; the server enforces office access.
     // Product mapping, warehouse and the sticker printer are server decisions.
     internal sealed class CrmQuickIntakeWindow : Window
     {
         private readonly CrmQuickIntakeClient client;
         private CrmQuickSubmission submission;
-        private readonly PasswordBox password = new PasswordBox { MinHeight = 36, Padding = new Thickness(8), MaxLength = 256 };
         private readonly TextBox quantity = new TextBox { Text = "1", MaxLength = 3, MinHeight = 36, Padding = new Thickness(8) };
         private readonly ComboBox condition = new ComboBox { MinHeight = 36, Padding = new Thickness(8, 5, 8, 5), SelectedIndex = -1 };
-        private readonly StackPanel loginPanel = new StackPanel(), selectionPanel = new StackPanel();
+        private readonly StackPanel selectionPanel = new StackPanel();
         private readonly TextBlock status = new TextBlock { TextWrapping = TextWrapping.Wrap, Margin = new Thickness(0, 6, 0, 8), MinHeight = 24, FontSize = 13 };
         private readonly Button primary = ActionButton("Continuă"), close = ActionButton("Anulează");
         private CancellationTokenSource cancellation;
-        private bool signedIn, busy, closed, completed, attempted;
+        private bool busy, closed, completed, attempted;
         private int generation;
 
         private sealed class ConditionChoice
@@ -41,13 +40,12 @@ namespace PcPulse
             FontFamily = new FontFamily("Segoe UI"); FontSize = 14;
             Background = Brush("#FFFFFF"); Foreground = Brush("#202723"); UseLayoutRounding = true;
             TextOptions.SetTextFormattingMode(this, TextFormattingMode.Display);
-            AutomationProperties.SetName(password, "Parola CRM");
             AutomationProperties.SetName(quantity, "Cantitate");
             AutomationProperties.SetName(condition, "Stare");
-            password.Background = quantity.Background = condition.Background = Brush("#FFFFFF");
-            password.Foreground = quantity.Foreground = condition.Foreground = Foreground;
-            password.BorderBrush = quantity.BorderBrush = condition.BorderBrush = Brush("#AEB8B2");
-            password.BorderThickness = quantity.BorderThickness = condition.BorderThickness = new Thickness(1);
+            quantity.Background = condition.Background = Brush("#FFFFFF");
+            quantity.Foreground = condition.Foreground = Foreground;
+            quantity.BorderBrush = condition.BorderBrush = Brush("#AEB8B2");
+            quantity.BorderThickness = condition.BorderThickness = new Thickness(1);
 
             var root = new Grid { Margin = new Thickness(16) };
             root.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
@@ -56,7 +54,6 @@ namespace PcPulse
             root.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
             root.Children.Add(new TextBlock { Text = "Trimite în CRM", FontSize = 22, FontWeight = FontWeights.SemiBold, Margin = new Thickness(0, 0, 0, 12) });
 
-            loginPanel.Children.Add(Field("Parola", password));
             var choices = new Grid();
             choices.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(88) });
             choices.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(12) });
@@ -68,7 +65,7 @@ namespace PcPulse
             condition.Items.Add(new ConditionChoice { Code = "like_new", Label = "Ca nou" });
             condition.Items.Add(new ConditionChoice { Code = "used", Label = "Folosit" });
             var body = new Grid { VerticalAlignment = VerticalAlignment.Top };
-            body.Children.Add(loginPanel); body.Children.Add(selectionPanel);
+            body.Children.Add(selectionPanel);
             // Scrolling is only a fallback for unusually small work areas or large system text.
             var scroller = new ScrollViewer { Content = body, VerticalScrollBarVisibility = ScrollBarVisibility.Auto, HorizontalScrollBarVisibility = ScrollBarVisibility.Disabled };
             Grid.SetRow(scroller, 1); root.Children.Add(scroller);
@@ -82,20 +79,18 @@ namespace PcPulse
             Grid.SetColumn(close, 1); Grid.SetColumn(primary, 2); actions.Children.Add(close); actions.Children.Add(primary);
             Grid.SetRow(actions, 3); root.Children.Add(actions); Content = root;
 
-            signedIn = client.IsAuthenticated;
             RestorePending(); UpdateState();
             primary.Click += async delegate { await ContinueAsync(); };
             close.Click += delegate { Close(); };
             Loaded += delegate
             {
                 DialogViewport.Position(this, DialogViewport.WorkArea(Owner));
-                if (signedIn) { quantity.Focus(); } else { password.Focus(); }
+                quantity.Focus();
             };
             Closing += delegate
             {
                 closed = true; generation++;
                 if (cancellation != null) { cancellation.Cancel(); }
-                password.Clear();
             };
             Closed += delegate { if (!busy) { client.Dispose(); } };
         }
@@ -103,28 +98,7 @@ namespace PcPulse
         private async Task ContinueAsync()
         {
             if (closed || busy || completed) { return; }
-            if (!signedIn) { await SignInAsync(); }
-            else { await SubmitAsync(); }
-        }
-
-        private async Task SignInAsync()
-        {
-            string secret = password.Password;
-            if (String.IsNullOrWhiteSpace(secret)) { status.Text = "Introdu parola."; password.Focus(); return; }
-            int request = BeginOperation("Se verifică parola…");
-            CancellationToken token = cancellation.Token;
-            password.Clear();
-            try
-            {
-                await client.LoginAsync(secret, token);
-                if (!Current(request)) { return; }
-                signedIn = true; RestorePending();
-                status.Text = attempted ? "Continuă trimiterea precedentă." : "";
-            }
-            catch (OperationCanceledException) { if (Current(request)) { status.Text = "Conectarea a fost anulată."; } }
-            catch (Exception error) { if (Current(request)) { status.Text = ErrorText(error, true); } }
-            finally { secret = null; password.Clear(); EndOperation(request); }
-            if (!closed && signedIn) { quantity.Focus(); }
+            await SubmitAsync();
         }
 
         private async Task SubmitAsync()
@@ -144,6 +118,8 @@ namespace PcPulse
             CancellationToken token = cancellation.Token;
             try
             {
+                if (!client.IsAuthenticated) { await client.LoginAsync(token); }
+                if (!Current(request)) { return; }
                 CrmQuickIntakeResult result = await client.SubmitAsync(client.Pending ?? submission, token);
                 if (!Current(request)) { return; }
                 if (result != null && result.Completed)
@@ -160,12 +136,11 @@ namespace PcPulse
                 {
                     var crmError = error as CrmException;
                     if (crmError != null && crmError.StatusCode == 401)
-                    { signedIn = false; password.Clear(); status.Text = "Introdu parola din nou pentru a continua."; }
+                    { status.Text = "Sesiunea a expirat. Încearcă din nou pentru a continua."; }
                     else { status.Text = ErrorText(error, false); }
                 }
             }
             finally { EndOperation(request); }
-            if (!closed && !signedIn) { password.Focus(); }
         }
 
         private void RestorePending()
@@ -194,11 +169,9 @@ namespace PcPulse
         }
         private void UpdateState()
         {
-            loginPanel.Visibility = signedIn ? Visibility.Collapsed : Visibility.Visible;
-            selectionPanel.Visibility = signedIn ? Visibility.Visible : Visibility.Collapsed;
-            password.IsEnabled = !busy && !completed;
+            selectionPanel.Visibility = Visibility.Visible;
             quantity.IsEnabled = condition.IsEnabled = !busy && !attempted && !completed;
-            primary.Content = signedIn ? "Trimite și imprimă" : "Continuă";
+            primary.Content = "Trimite și imprimă";
             primary.Visibility = completed ? Visibility.Collapsed : Visibility.Visible;
             primary.IsEnabled = !busy && !closed && !completed;
             close.Content = completed ? "Închide" : "Anulează";
@@ -207,7 +180,7 @@ namespace PcPulse
         {
             var crm = error as CrmException;
             int code = crm == null ? 0 : crm.StatusCode;
-            if (code == 401) { return "Parola nu este corectă."; }
+            if (code == 401) { return "Sesiunea a expirat. Încearcă din nou."; }
             if (code == 403) { return "CRM este disponibil doar din oficiu."; }
             if (code == 409) { return "Verifică trimiterea în CRM."; }
             if (code == 404 || code == 503) { return "Conectarea CRM nu este încă disponibilă."; }

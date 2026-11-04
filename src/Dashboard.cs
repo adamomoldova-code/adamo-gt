@@ -664,7 +664,7 @@ namespace PcPulse
             }
             diskSelector.ToolTip = disk == null ? "Накопители не определены" : disk.Name + (detail.Length > 0 ? "\n" + detail : "");
             SetText("DiskHealth", Display.Number(disk == null ? null : disk.HealthPercent, " %", 0));
-            SetBar("DiskHealthBar", disk == null ? null : disk.HealthPercent);
+            SetHealth("DiskHealth", "DiskHealthBar", disk == null ? null : disk.HealthPercent);
             ((TextBlock)window.FindName("DiskHealth")).FontSize = disk != null && disk.HealthPercent.HasValue ? 28 : 14;
             ((TextBlock)window.FindName("DiskHealth")).ToolTip = "Оценка оставшегося ресурса по SMART. Это не гарантия исправности. " + (disk == null ? "" : disk.SmartSource);
             SetText("PowerOnHours", disk != null && disk.PowerOnHours.HasValue ? disk.PowerOnHours.Value.ToString("N0", CultureInfo.GetCultureInfo("ru-RU")) : "Нет данных");
@@ -785,7 +785,7 @@ namespace PcPulse
             ((TextBlock)window.FindName("BatteryChargeLabel")).Visibility = batteryAbsent ? Visibility.Collapsed : Visibility.Visible;
             SetText("BatteryStatus", batteryAbsent ? "Компьютер работает без батареи" : data.BatteryStatus);
             SetText("BatteryHealth", batteryAbsent ? "—" : Display.Number(data.BatteryHealthPercent, " %", 0));
-            SetBar("BatteryHealthBar", batteryAbsent ? null : data.BatteryHealthPercent);
+            SetHealth("BatteryHealth", "BatteryHealthBar", batteryAbsent ? null : data.BatteryHealthPercent);
             SetText("BatteryDesignCapacity", batteryAbsent ? "—" : Display.Number(data.BatteryDesignWh, " Вт·ч", 2));
             SetText("BatteryFullCapacity", batteryAbsent ? "—" : Display.Number(data.BatteryFullChargeWh, " Вт·ч", 2));
             SetText("BatteryRuntime", batteryAbsent ? "—" : data.BatteryRuntimeMinHours.HasValue && data.BatteryRuntimeMaxHours.HasValue
@@ -821,6 +821,17 @@ namespace PcPulse
             TextBlock text = (TextBlock)window.FindName(name);
             text.Text = value ?? "Нет данных";
             text.ToolTip = text.Text;
+        }
+
+        private void SetHealth(string textName, string barName, double? value)
+        {
+            SetBar(barName, value);
+            bool known = value.HasValue && !Double.IsNaN(value.Value) && !Double.IsInfinity(value.Value)
+                && value.Value >= 0 && value.Value <= 100;
+            string resource = !known ? "Muted" : value.Value > 60 ? "Teal" : "Amber";
+            Brush brush = (Brush)window.FindResource(resource);
+            ((TextBlock)window.FindName(textName)).Foreground = brush;
+            ((ProgressBar)window.FindName(barName)).Foreground = brush;
         }
 
         private void SetBar(string name, double? value)
