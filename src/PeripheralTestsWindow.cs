@@ -24,7 +24,7 @@ namespace PcPulse
         private readonly Func<PeripheralTestResult, bool> save;
         private readonly string historyError;
         private readonly CameraPreview camera = new CameraPreview();
-        private readonly PeripheralAudio audio = new PeripheralAudio();
+        private readonly PeripheralAudio audio;
         private readonly KeyboardTestPanel keyboard = new KeyboardTestPanel();
         private readonly CameraHost cameraHost = new CameraHost();
         private readonly TabControl tabs = new TabControl();
@@ -33,8 +33,9 @@ namespace PcPulse
         private readonly ComboBox outputs = Selector("Устройство воспроизведения");
         private readonly TextBlock cameraStatus = Text("Камера выключена. Нажмите «Включить камеру»."), micStatus = Text("Запись не запускалась."), speakerStatus = Text("Выберите устройство и прослушайте оба канала.");
         private readonly TextBlock saved = Text(""), session = Text(""), cameraPlaceholder = Text("Предпросмотр камеры\nФото и видео не сохраняются.");
-        private readonly ProgressBar level = new ProgressBar { Minimum = 0, Maximum = 100, Height = 16, Margin = new Thickness(0, 8, 0, 8) };
-        private readonly Button passed = MakeButton("Работает"), problem = MakeButton("Проблема"), cameraStart = MakeButton("Включить камеру"), record = MakeButton("Записать 5 секунд"), playback = MakeButton("Прослушать запись"), left = MakeButton("Левый канал"), right = MakeButton("Правый канал"), reload = MakeButton("Обновить список");
+        private readonly ProgressBar level = new ProgressBar { Minimum = 0, Maximum = 100, Height = 22, Foreground = Brush("#52785B"), Background = Brush("#E2E6E9"), Margin = new Thickness(0, 8, 0, 4) };
+        private readonly TextBlock levelText = Text("Нет сигнала · шкала −60…0 dBFS");
+        private readonly Button passed = MakeButton("Работает"), problem = MakeButton("Проблема"), cameraStart = MakeButton("Включить камеру"), record = MakeButton("Записать 3 секунды"), playback = MakeButton("Прослушать запись"), left = MakeButton("Левый канал"), right = MakeButton("Правый канал"), reload = MakeButton("Обновить список");
         private readonly HashSet<string> exercised = new HashSet<string>();
         private readonly List<Button> refreshButtons = new List<Button>();
         private readonly Button keyboardStart = MakeButton("Продолжить"), keyboardStop = MakeButton("Остановить"), keyboardReset = MakeButton("Сбросить клавиши");
@@ -50,8 +51,9 @@ namespace PcPulse
         private int generation, speakerChannels, keyboardCaptureRequest;
         private bool keyboardWasRunning;
 
-        internal PeripheralTestsWindow(IEnumerable<PeripheralTestResult> previous, Func<PeripheralTestResult, bool> saveResult, bool enumerateOnLoad = true, string historyError = "")
+        internal PeripheralTestsWindow(IEnumerable<PeripheralTestResult> previous, Func<PeripheralTestResult, bool> saveResult, bool enumerateOnLoad = true, string historyError = "", PeripheralAudio audioEngine = null)
         {
+            audio = audioEngine ?? new PeripheralAudio();
             results = (previous ?? new PeripheralTestResult[0]).Where(PeripheralTestResult.Valid).GroupBy(item => item.Kind).ToDictionary(group => group.Key, group => group.Last().Copy());
             save = saveResult;
             this.historyError = historyError ?? "";
@@ -167,11 +169,12 @@ namespace PcPulse
         private UIElement BuildMicrophone()
         {
             var panel = new StackPanel();
-            panel.Children.Add(Text("Скажите несколько слов. Запись длится до 5 секунд. Затем прослушайте её и оцените речь, шум и искажения. Автоматического вывода микрофона на динамики нет."));
+            panel.Children.Add(Text("Нажмите «Записать 3 секунды» и скажите несколько слов. После записи звук воспроизводится автоматически. Оцените речь, шум и искажения."));
             panel.Children.Add(inputs);
             var stop = MakeButton("Остановить"); stop.Click += async delegate { if (Kind == "microphone") { await StopDevices(); } };
             panel.Children.Add(Row(record, stop, playback, RefreshButton("microphone")));
-            panel.Children.Add(Text("Уровень входного сигнала")); panel.Children.Add(level); panel.Children.Add(micStatus);
+            AutomationProperties.SetName(level, "Уровень звука микрофона");
+            panel.Children.Add(Text("Уровень входного сигнала")); panel.Children.Add(level); panel.Children.Add(levelText); panel.Children.Add(micStatus);
             panel.Children.Add(Text("Запись воспроизводится через устройство, выбранное на вкладке «Динамики». Если микрофон недоступен, проверьте его подключение и разрешения для классических приложений в Windows."));
             return panel;
         }
@@ -356,23 +359,42 @@ namespace PcPulse
             await stopping; if (!CanContinue(request) || Kind != "microphone") { return; }
             ClearRecording(); ResetExercise("microphone");
             int current = ++generation; busy = true; audioCancellation = new CancellationTokenSource(); UpdateButtons();
+            CancellationTokenSource recordingCancellation = audioCancellation;
             activeOperation = "microphone-record";
-            micStatus.Text = "Говорите… запись до 5 секунд.";
+            micStatus.Text = "Говорите… запись 3 секунды.";
             try
             {
                 AudioRecording captured = await audio.RecordMicrophoneAsync(device.Id, value => Dispatch(delegate
                 {
-                    if (current != generation || closed) { return; }
-                    level.Value = Math.Min(100, value.Peak * 100);
-                    micStatus.Text = "Запись: " + value.ElapsedSeconds.ToString("0.0", CultureInfo.InvariantCulture) + " / 5 с · пик " + (value.Peak * 100).ToString("0", CultureInfo.InvariantCulture) + "%";
+                    if (current != generation || closed || activeOperation != "microphone-record") { return; }
+                    level.Value = MicrophoneLevel(value.Peak);
+                    levelText.Text = value.Peak <= 0 ? "Нет сигнала · шкала −60…0 dBFS" : (20 * Math.Log10(value.Peak)).ToString("0", CultureInfo.InvariantCulture) + " dBFS";
+                    micStatus.Text = "Запись: " + value.ElapsedSeconds.ToString("0.0", CultureInfo.InvariantCulture) + " / 3 с · пик " + (value.Peak * 100).ToString("0", CultureInfo.InvariantCulture) + "%";
                 }), audioCancellation.Token);
                 if (current != generation || closed) { if (captured != null) { captured.Dispose(); } return; }
                 recording = captured;
-                micStatus.Text = "Запись готова. Прослушайте её перед подтверждением исправности.";
+                AudioDevice output = outputs.SelectedItem as AudioDevice;
+                if (output == null) { micStatus.Text = "Запись готова. Нет устройства воспроизведения: подключите динамики или наушники и нажмите «Прослушать запись»."; return; }
+                activeOperation = "microphone-play"; level.Value = 0;
+                micStatus.Text = "Запись готова. Воспроизводим автоматически…";
+                await audio.PlaybackAsync(recording, output.Id, audioCancellation.Token);
+                if (current != generation || closed || Kind != "microphone") { return; }
+                exercised.Add("microphone");
+                micStatus.Text = "Воспроизведение завершено. Слышна ли речь без искажений? Укажите результат.";
             }
             catch (OperationCanceledException) { }
-            catch (Exception ex) { if (!closed && current == generation) { micStatus.Text = "Микрофон недоступен: " + ex.Message; } }
-            finally { if (current == generation) { activeOperation = null; busy = false; level.Value = 0; UpdateButtons(); UpdateVerdict(); } }
+            catch (Exception ex) { if (!closed && current == generation) { micStatus.Text = (activeOperation == "microphone-play" ? "Запись готова, но воспроизведение не удалось: " : "Микрофон недоступен: ") + ex.Message; } }
+            finally
+            {
+                if (ReferenceEquals(audioCancellation, recordingCancellation)) { audioCancellation = null; recordingCancellation.Dispose(); }
+                if (current == generation) { activeOperation = null; busy = false; level.Value = 0; UpdateButtons(); UpdateVerdict(); }
+            }
+        }
+
+        internal static double MicrophoneLevel(double peak)
+        {
+            if (Double.IsNaN(peak) || peak <= .001) { return 0; }
+            return Math.Min(100, Math.Max(0, (20 * Math.Log10(peak) + 60) / 60 * 100));
         }
 
         private async Task Play()

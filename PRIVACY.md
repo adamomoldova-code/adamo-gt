@@ -12,7 +12,7 @@ This preference only controls automatic CRM availability checks. Online port loo
 
 Hardware inventory, benchmarks and manual device tests run on this computer. ADAMO GT does not automatically upload reports, benchmark results, camera frames, microphone recordings or keyboard input to ADAMO.
 
-Camera preview and microphone recordings of up to five seconds are used in memory. Saved device test results contain the user's verdict, device details and date, and a count of tested keys where relevant. They do not contain photographs, sound or an individual sequence of pressed keys.
+Camera preview and microphone recordings of three seconds are used in memory. Saved device test results contain the user's verdict, device details and date, and a count of tested keys where relevant. They do not contain photographs, sound or an individual sequence of pressed keys. During the active keyboard test, a temporary Windows keyboard hook suppresses shortcuts only while its capture area has foreground focus. It is removed on focus loss, deactivation, Stop, Esc, tab changes and closing. No background input is recorded.
 
 ## Optional network access
 

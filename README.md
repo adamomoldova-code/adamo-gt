@@ -6,9 +6,9 @@ ADAMO GT displays CPU, RAM, GPU, storage, battery, display and model information
 
 Project and downloads: [ADAMO.MD](https://adamo.md/ro/blog/adamo-gt-verificare-laptop-pc).
 
-## Version 2.7.4
+## Version 2.7.5
 
-This source builds ADAMO GT 2.7.4: office-only CRM submission without a password, detected Touch on product labels after resolution, and green battery/SSD health indicators above 60%. SignPath Foundation approval is still pending; this release is unsigned.
+This source builds ADAMO GT 2.7.5: a live microphone level meter, three-second recording with automatic playback, and foreground-only keyboard shortcut suppression during the keyboard test. Esc or Stop releases capture; leaving the capture area, changing tabs or deactivating the window restores normal input. Ctrl+Alt+Del remains available. Office-only CRM submission without a password, detected Touch on product labels after resolution, and green battery/SSD health indicators above 60% are retained. SignPath Foundation approval is still pending; this release is unsigned.
 
 On first graphical use, 2.7.2 presents the embedded privacy policy. Automatic CRM availability checks are off until explicitly enabled and saved. Change this choice in **Датчики → Confidențialitate**; local diagnostics continue to work with CRM disabled. Missing, corrupt or obsolete preferences leave automatic CRM checks disabled.
 

@@ -82,12 +82,12 @@ namespace PcPulseTests
                 using (AudioRecording recording = audio.RecordMicrophoneAsync(-1, delegate(AudioLevel level)
                 {
                     callbacks++;
-                    validLevels &= level.ElapsedSeconds > 0 && level.ElapsedSeconds <= 5 && level.Peak > 0 && level.Peak <= 1;
+                    validLevels &= level.ElapsedSeconds > 0 && level.ElapsedSeconds <= 3 && level.Peak > 0 && level.Peak <= 1;
                 }, CancellationToken.None).GetAwaiter().GetResult())
                 {
                     Require(recording.SampleRate == 44100 && recording.Channels == (mono ? 1 : 2), "Selected format metadata survives negotiation");
-                    Require(recording.DurationSeconds == 5 && recording.ByteCount == 44100 * recording.Channels * 2 * 5, "Exactly five seconds of bounded PCM are retained");
-                    Require(callbacks == 100, "Live levels arrive per 50 millisecond chunk");
+                    Require(recording.DurationSeconds == 3 && recording.ByteCount == 44100 * recording.Channels * 2 * 3, "Exactly three seconds of bounded PCM are retained");
+                    Require(callbacks == 60, "Live levels arrive per 50 millisecond chunk");
                     Require(validLevels, "Live levels are bounded even though the engine isolates UI callback exceptions");
                     Require(api.Opens.Count == (mono ? 3 : 1), "Only unsupported formats trigger the bounded fallback list");
                 }
@@ -99,8 +99,8 @@ namespace PcPulseTests
                 using (var audio = new PeripheralAudio(api))
                 using (AudioRecording recording = audio.RecordMicrophoneAsync(-1, null, CancellationToken.None).GetAwaiter().GetResult())
                 {
-                    Require(recording.SampleRate == speechRate && recording.Channels == 1 && recording.DurationSeconds == 5,
-                        "Speech-only input preserves the negotiated mono rate and five-second bound");
+                    Require(recording.SampleRate == speechRate && recording.Channels == 1 && recording.DurationSeconds == 3,
+                        "Speech-only input preserves the negotiated mono rate and three-second bound");
                     Require(api.Opens.Count == (speechRate == 16000 ? 6 : 7), "Speech rates are attempted only after higher-quality formats are unsupported");
                 }
                 Clean(api);
@@ -108,9 +108,9 @@ namespace PcPulseTests
             var callbackApi = new FakeWaveApi();
             using (var audio = new PeripheralAudio(callbackApi))
             using (AudioRecording recording = audio.RecordMicrophoneAsync(-1, delegate { throw new InvalidOperationException("UI closed"); }, CancellationToken.None).GetAwaiter().GetResult())
-                Require(recording.DurationSeconds == 5, "A failed UI callback does not leak the microphone");
+                Require(recording.DurationSeconds == 3, "A failed UI callback does not leak the microphone");
             Clean(callbackApi);
-            Console.WriteLine("PASS: five-second capture, live levels, mono/16 kHz/8 kHz fallback and closed-UI callbacks");
+            Console.WriteLine("PASS: three-second capture, live levels, mono/16 kHz/8 kHz fallback and closed-UI callbacks");
         }
         private static void FailureCleanup()
         {
@@ -294,7 +294,7 @@ namespace PcPulseTests
         }
         private static void Require(bool condition, string message) { if (!condition) { throw new InvalidOperationException(message); } }
 
-        private sealed class FakeWaveApi : IPeripheralWaveApi
+        internal sealed class FakeWaveApi : IPeripheralWaveApi
         {
             internal readonly List<PeripheralWaveFormat> Opens = new List<PeripheralWaveFormat>();
             internal readonly List<uint> OpenIds = new List<uint>();

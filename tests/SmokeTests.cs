@@ -53,7 +53,7 @@ namespace PcPulseTests
                 Run("Audio capture and channel tests release buffers on failure and cancellation", PeripheralAudioTests.Run);
                 Run("Camera preview cancels late startup and releases sessions without hardware capture", CameraPreviewTests.Run);
                 var peripheralsApp = new Application { ShutdownMode = ShutdownMode.OnExplicitShutdown };
-                Run("Keyboard test captures only explicit local input and preserves system shortcuts", KeyboardTestPanelTests.Run);
+                Run("Keyboard test confines shortcuts to active capture and releases outside focus", KeyboardTestPanelTests.Run);
                 Run("Peripheral tabs remain accessible and manual verdicts require evidence", PeripheralWindowTests.Run);
                 Run("Device controls and report retain manual results", ConfigurationReportTests.Run);
                 Console.WriteLine("RESULT: " + passed + " passed; " + failed + " failed.");
@@ -175,7 +175,7 @@ namespace PcPulseTests
             Run("Dashboard CRM action is isolated and waits for completed inventory", CrmDashboardTests.Run);
             Run("CRM screenshot captures the real first page without other windows", CrmDashboardCaptureTests.Run);
             Run("Stress dialog requires a manual choice and waits for stop cleanup", StressWindowTests.Run);
-            Run("Keyboard test captures only explicit local input and preserves system shortcuts", KeyboardTestPanelTests.Run);
+            Run("Keyboard test confines shortcuts to active capture and releases outside focus", KeyboardTestPanelTests.Run);
             Run("Peripheral tabs remain accessible and manual verdicts require evidence", PeripheralWindowTests.Run);
             Run("Dashboard scales to smaller work areas without clipping", DashboardViewportTests.Run);
             Run("Sensor help fits small monitor work areas and its content remains scrollable", DialogViewportTests.Run);

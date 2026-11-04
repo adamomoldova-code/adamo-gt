@@ -23,6 +23,7 @@ namespace PcPulseTests
             VerifyStoppedStatusAndRecordingRetention();
             VerifyInactiveTabActionsDoNotRun();
             VerifyAudioContinuationStaysOnItsTab();
+            VerifyMicrophoneAutoPlayback();
             VerifyIndependentDiscovery();
             foreach (Size size in new[] { new Size(480, 360), new Size(640, 440), new Size(920, 730) })
             {
@@ -183,6 +184,55 @@ namespace PcPulseTests
                 }
             }
             Invoke(window, "ClearRecording"); AssertNoDevicesStarted(window); CloseWithoutHardware(window);
+        }
+
+        private static void VerifyMicrophoneAutoPlayback()
+        {
+            SynchronizationContext previous = SynchronizationContext.Current;
+            SynchronizationContext.SetSynchronizationContext(new DispatcherSynchronizationContext(Dispatcher.CurrentDispatcher));
+            try
+            {
+                Require(PeripheralTestsWindow.MicrophoneLevel(0) == 0 && PeripheralTestsWindow.MicrophoneLevel(Double.NaN) == 0
+                    && PeripheralTestsWindow.MicrophoneLevel(1) == 100
+                    && Math.Abs(PeripheralTestsWindow.MicrophoneLevel(.1) - 200.0 / 3) < .01, "The live meter shows quiet speech on a bounded logarithmic scale");
+                foreach (string scenario in new[] { "normal", "no-output", "cancel-record", "cancel-play", "switch-tab" })
+                {
+                    var api = new PeripheralAudioTests.FakeWaveApi { CompleteInput = scenario != "cancel-record", CompleteOutput = scenario != "cancel-play" };
+                    var window = new PeripheralTestsWindow(null, null, false, "", new PeripheralAudio(api));
+                    var tabs = Field<TabControl>(window, "tabs"); tabs.SelectedIndex = 1;
+                    var inputs = Field<ComboBox>(window, "inputs"); inputs.Items.Add(new AudioDevice(-1, "Fake microphone")); inputs.SelectedIndex = 0;
+                    if (scenario != "no-output")
+                    {
+                        var outputs = Field<ComboBox>(window, "outputs"); outputs.Items.Add(new AudioDevice(-1, "Fake speakers")); outputs.SelectedIndex = 0;
+                    }
+                    Task operation = (Task)Invoke(window, "Record");
+                    if (scenario == "cancel-record" || scenario == "cancel-play" || scenario == "switch-tab")
+                    {
+                        DateTime deadline = DateTime.UtcNow.AddSeconds(3);
+                        while ((scenario == "cancel-record" ? !api.Started.WaitOne(0) : api.WrittenOutput == null) && DateTime.UtcNow < deadline) { Pump(); }
+                        Require(scenario == "cancel-record" ? api.Started.WaitOne(0) : api.WrittenOutput != null, "The fake audio phase started before cancellation");
+                        if (scenario == "switch-tab") { tabs.SelectedIndex = 3; }
+                        else { Drain((Task)Invoke(window, "StopDevices")); }
+                    }
+                    Drain(operation);
+                    if (scenario == "normal")
+                    {
+                        var recording = Field<AudioRecording>(window, "recording");
+                        Require(recording != null && recording.DurationSeconds == 3, "The form records exactly three seconds");
+                        Require(api.WrittenOutput != null && api.WrittenOutput.Length == recording.ByteCount, "Recording automatically plays without another click");
+                        Require(Field<HashSet<string>>(window, "exercised").Contains("microphone"), "Only completed playback enables a microphone verdict");
+                    }
+                    else if (scenario == "no-output")
+                    {
+                        Require(api.WrittenOutput == null && Field<AudioRecording>(window, "recording") != null, "An absent speaker retains the recording for later playback");
+                    }
+                    else if (scenario == "cancel-record") { Require(api.WrittenOutput == null, "Stopping recording never starts automatic playback"); }
+                    if (scenario != "normal") { Require(!Field<HashSet<string>>(window, "exercised").Contains("microphone"), "Cancellation, tab changes and missing output cannot imply successful playback"); }
+                    Require(Field<PeripheralAudio>(window, "audio").Completion.IsCompleted, "The worker has released the audio device");
+                    CloseWithoutHardware(window);
+                }
+            }
+            finally { SynchronizationContext.SetSynchronizationContext(previous); }
         }
 
         private static void VerifyAudioContinuationStaysOnItsTab()

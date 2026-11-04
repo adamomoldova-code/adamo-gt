@@ -55,9 +55,24 @@ namespace PcPulseTests
             Require(KeyboardTestPanel.NormalizeKey(Key.LeftShift, Key.None, Key.None) == Key.LeftShift, "Ordinary keys remain unchanged");
             Require(KeyboardTestPanel.CapturesNavigation(Key.Tab, ModifierKeys.None) && KeyboardTestPanel.CapturesNavigation(Key.Tab, ModifierKeys.Shift), "Tab and Shift+Tab stay in the explicit capture surface");
             Require(KeyboardTestPanel.CapturesNavigation(Key.Return, ModifierKeys.None) && KeyboardTestPanel.CapturesNavigation(Key.Space, ModifierKeys.None), "Plain Enter and Space cannot activate outside buttons while captured");
-            Require(!KeyboardTestPanel.CapturesNavigation(Key.F4, ModifierKeys.Alt) && !KeyboardTestPanel.CapturesNavigation(Key.Tab, ModifierKeys.Alt)
-                && !KeyboardTestPanel.CapturesNavigation(Key.LWin, ModifierKeys.Windows) && !KeyboardTestPanel.CapturesNavigation(Key.Escape, ModifierKeys.Control), "OS shortcuts remain unhandled");
+            Require(KeyboardTestPanel.CapturesNavigation(Key.F4, ModifierKeys.Alt) && KeyboardTestPanel.CapturesNavigation(Key.Tab, ModifierKeys.Alt)
+                && KeyboardTestPanel.CapturesNavigation(Key.LWin, ModifierKeys.Windows) && KeyboardTestPanel.CapturesNavigation(Key.Escape, ModifierKeys.Control), "OS shortcuts stay inside the active keyboard test");
             Require(!panel.Summary.Contains("исправна") && !panel.Summary.Contains("100"), "A seen count never declares an automatic hardware pass");
+            foreach (Key key in new[] { Key.LWin, Key.RWin, Key.Left, Key.Right, Key.Up, Key.Down })
+            {
+                panel.ProcessKey(key, true, true);
+                panel.ProcessKey(key, false, true);
+                Require(panel.HasSeen(key.ToString()) && !panel.IsPressed(key.ToString()) && panel.IsRunning, "Win and arrows preserve the running test and remember releases");
+            }
+            foreach (int message in new[] { 0x100, 0x101, 0x104, 0x105 })
+            {
+                Require(KeyboardTestPanel.CapturesNativeInput(true, true, true, 0, message), "Key down/up and system keys are suppressed during capture");
+                Require(!KeyboardTestPanel.CapturesNativeInput(false, true, true, 0, message)
+                    && !KeyboardTestPanel.CapturesNativeInput(true, false, true, 0, message)
+                    && !KeyboardTestPanel.CapturesNativeInput(true, true, false, 0, message)
+                    && !KeyboardTestPanel.CapturesNativeInput(true, true, true, -1, message), "Stopped, unfocused, background and negative-code hook events always pass through");
+            }
+            Require(!KeyboardTestPanel.CapturesNativeInput(true, true, true, 0, 0x200), "Unrelated messages are never captured");
             panel.Stop();
         }
 

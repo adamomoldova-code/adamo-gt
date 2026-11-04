@@ -10,8 +10,8 @@ using System.Windows.Media;
 
 namespace PcPulse
 {
-    // Observes only this window's input while explicitly started. No global hook,
-    // typed text, key sequence or background keyboard monitoring is retained.
+    // Temporary shortcut suppression only while this test owns foreground focus.
+    // No typed text, key sequence or background keyboard monitoring is retained.
     public sealed class KeyboardTestPanel : UserControl
     {
         private const double KeyUnit = 36;
@@ -30,6 +30,10 @@ namespace PcPulse
         private int nativeScanCode;
         private bool nativeExtended;
         private bool nativeKeyDown;
+        private IntPtr keyboardHook;
+        private LowLevelKeyboardProc keyboardCallback;
+        private int captureGeneration;
+        private string captureError;
 
         public event EventHandler ProgressChanged;
         public bool IsRunning { get; private set; }
@@ -74,11 +78,11 @@ namespace PcPulse
             captureSurface = new Border { Child = scroll, Focusable = true, Background = Brushes.Transparent };
             KeyboardNavigation.SetIsTabStop(captureSurface, true);
             AutomationProperties.SetName(captureSurface, "Область проверки клавиатуры. Escape завершает захват клавиш.");
-            captureSurface.GotKeyboardFocus += delegate { UpdateStatus(false); };
+            captureSurface.GotKeyboardFocus += delegate { AttachKeyboardHook(); UpdateStatus(false); };
             Add(panel, captureSurface, 2);
             status = Text(""); status.FontWeight = FontWeights.SemiBold;
             Add(panel, status, 3);
-            var note = Text("Esc завершает захват и возвращает обычную навигацию Tab. Alt+F4 и сочетания Win работают как обычно. Схема типовая: на ноутбуке может не быть NumPad, правого Win или ISO. Fn, питание и часть специальных клавиш Windows не передаёт. Счётчик не означает, что вся клавиатура исправна — результат подтвердите вручную.");
+            var note = Text("Esc или «Остановить» завершает захват. Пока область теста активна, Win, стрелки и сочетания клавиш проверяются без открытия «Пуска», переключения окон и запуска команд. При уходе из окна обычная работа клавиш восстанавливается. Ctrl+Alt+Del остаётся доступным. Схема типовая: Fn, питание и часть специальных клавиш Windows не передаёт. Результат подтвердите вручную.");
             note.FontSize = 13; note.Foreground = Brush("#4B5158"); note.Margin = new Thickness(0, 8, 0, 0);
             Add(panel, note, 4);
             Content = panel;
@@ -95,6 +99,7 @@ namespace PcPulse
             IsRunning = true;
             AttachWindow();
             captureSurface.Focus();
+            AttachKeyboardHook();
             UpdateStatus(starting);
         }
 
@@ -115,6 +120,7 @@ namespace PcPulse
 
         public void Reset()
         {
+            captureGeneration++;
             seen.Clear();
             pressed.Clear();
             nativeTimestamp = Int32.MinValue;
@@ -122,8 +128,7 @@ namespace PcPulse
             UpdateStatus(true);
         }
 
-        // Shared by preview input and deterministic tests. scanCode comes only
-        // from the owning HWND's matching message, never a global keyboard hook.
+        // Shared by preview input, foreground hook events and deterministic tests.
         public bool ProcessKey(Key key, bool isDown, bool isExtended = false, int scanCode = 0)
         {
             if (!IsRunning) { return false; }
@@ -189,6 +194,7 @@ namespace PcPulse
 
         private void DetachWindow()
         {
+            DetachKeyboardHook();
             if (source != null)
             {
                 if (!source.IsDisposed) { source.RemoveHook(ObserveWindowMessage); }
@@ -207,12 +213,12 @@ namespace PcPulse
 
         private void SourceInitialized(object sender, EventArgs args) { AttachSource(); }
         private void OwnerClosed(object sender, EventArgs args) { Stop(); }
-        private void OwnerDeactivated(object sender, EventArgs args) { ReleasePressedKeys(); }
-        private void OwnerActivated(object sender, EventArgs args) { UpdateStatus(false); }
+        private void OwnerDeactivated(object sender, EventArgs args) { DetachKeyboardHook(); ReleasePressedKeys(); }
+        private void OwnerActivated(object sender, EventArgs args) { if (IsRunning) { captureSurface.Focus(); AttachKeyboardHook(); } UpdateStatus(false); }
         private void FocusLost(object sender, KeyboardFocusChangedEventArgs args)
         {
             var destination = args.NewFocus as DependencyObject;
-            if (!InsideCapture(destination)) { ReleasePressedKeys(); }
+            if (!InsideCapture(destination)) { DetachKeyboardHook(); ReleasePressedKeys(); }
         }
         private void KeyDownObserved(object sender, KeyEventArgs args) { ObserveKey(args, true); }
         private void KeyUpObserved(object sender, KeyEventArgs args) { ObserveKey(args, false); }
@@ -230,15 +236,61 @@ namespace PcPulse
                 Stop();
             }
             else if (CapturesNavigation(key, modifiers)) { args.Handled = true; }
-            // Only plain navigation/activation keys stay inside capture. Alt+F4,
-            // Alt+Tab, Ctrl+Esc, Win and other OS shortcuts are not swallowed.
+            // Also handle posted/WPF navigation messages which do not pass the hook.
         }
 
         internal static bool CapturesNavigation(Key key, ModifierKeys modifiers)
         {
-            return key == Key.Tab && (modifiers == ModifierKeys.None || modifiers == ModifierKeys.Shift)
-                || (key == Key.Space || key == Key.Return) && modifiers == ModifierKeys.None;
+            return key != Key.None;
         }
+
+        internal static bool CapturesNativeInput(bool running, bool foreground, bool focused, int code, int message)
+        {
+            return running && foreground && focused && code >= 0
+                && (message == 0x100 || message == 0x101 || message == 0x104 || message == 0x105);
+        }
+
+        private void AttachKeyboardHook()
+        {
+            if (keyboardHook != IntPtr.Zero || !IsRunning || owner == null || !owner.IsActive || !captureSurface.IsKeyboardFocusWithin || source == null) { return; }
+            keyboardCallback = CaptureKeyboard;
+            keyboardHook = SetWindowsHookEx(13, keyboardCallback, GetModuleHandle(null), 0);
+            captureError = keyboardHook == IntPtr.Zero ? "Не удалось включить защиту от сочетаний Windows. Остановите тест и попробуйте снова." : null;
+        }
+
+        private void DetachKeyboardHook()
+        {
+            captureGeneration++;
+            if (keyboardHook != IntPtr.Zero) { UnhookWindowsHookEx(keyboardHook); keyboardHook = IntPtr.Zero; }
+        }
+
+        private IntPtr CaptureKeyboard(int code, IntPtr message, IntPtr data)
+        {
+            if (!CapturesNativeInput(IsRunning, source != null && GetForegroundWindow() == source.Handle,
+                captureSurface.IsKeyboardFocusWithin, code, message.ToInt32()))
+            { return CallNextHookEx(keyboardHook, code, message, data); }
+            var input = (LowLevelKeyboardInput)Marshal.PtrToStructure(data, typeof(LowLevelKeyboardInput));
+            bool down = message.ToInt32() == 0x100 || message.ToInt32() == 0x104;
+            int epoch = captureGeneration;
+            // Keep the OS callback fast. Paint and notify on the UI dispatcher.
+            Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.Input, new Action(delegate
+            {
+                if (epoch != captureGeneration || !IsRunning || owner == null || !owner.IsActive || !captureSurface.IsKeyboardFocusWithin) { return; }
+                Key key = KeyInterop.KeyFromVirtualKey((int)input.VirtualKey);
+                ProcessKey(key, down, (input.Flags & 1) != 0, (int)input.ScanCode);
+                if (key == Key.Escape && down) { Stop(); }
+            }));
+            return new IntPtr(1);
+        }
+
+        [StructLayout(LayoutKind.Sequential)]
+        private struct LowLevelKeyboardInput { public uint VirtualKey, ScanCode, Flags, Time; public UIntPtr ExtraInfo; }
+        private delegate IntPtr LowLevelKeyboardProc(int code, IntPtr message, IntPtr data);
+        [DllImport("user32.dll", SetLastError = true)] private static extern IntPtr SetWindowsHookEx(int kind, LowLevelKeyboardProc callback, IntPtr module, uint thread);
+        [DllImport("user32.dll")] private static extern bool UnhookWindowsHookEx(IntPtr hook);
+        [DllImport("user32.dll")] private static extern IntPtr CallNextHookEx(IntPtr hook, int code, IntPtr message, IntPtr data);
+        [DllImport("user32.dll")] private static extern IntPtr GetForegroundWindow();
+        [DllImport("kernel32.dll", CharSet = CharSet.Unicode)] private static extern IntPtr GetModuleHandle(string name);
 
         private bool InsideCapture(DependencyObject element)
         {
@@ -286,6 +338,7 @@ namespace PcPulse
             string state = IsRunning ? "Тест идёт" : seen.Count > 0 ? "Тест остановлен" : "Тест ещё не запущен";
             Summary = state + " · Получено нажатий разных клавиш: " + seen.Count + " · Сейчас нажато: " + pressed.Count;
             status.Text = Summary;
+            if (IsRunning && captureError != null) { focusStatus.Text = captureError; if (notify && ProgressChanged != null) { ProgressChanged(this, EventArgs.Empty); } return; }
             focusStatus.Text = !IsRunning ? "Учёт остановлен. Нажмите «Продолжить», выберите вкладку заново или вернитесь в окно проверки."
                 : owner != null && !owner.IsActive ? "Окно неактивно. Вернитесь в окно проверки; новые нажатия вне него не учитываются."
                 : !captureSurface.IsKeyboardFocusWithin ? "Выберите область клавиатуры мышью или клавишей Tab, чтобы продолжить учёт."

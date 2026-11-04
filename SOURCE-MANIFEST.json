@@ -61,13 +61,13 @@
   },
   {
     "Path": "PRIVACY.md",
-    "Length": 8587,
-    "Sha256": "8bc2283bea02f0b45dd51773d55db21a85e88f3d9443a3b1d461d6a344abe1d0"
+    "Length": 8832,
+    "Sha256": "15ac02fc1ce516330206512d64861a91501b675186da79c19e6af7f7a5b12648"
   },
   {
     "Path": "README.md",
-    "Length": 9092,
-    "Sha256": "5bbfdcd1633b24ff9ae289f98e4ce87ef790e95df81e40c131882edc1481c1bc"
+    "Length": 9412,
+    "Sha256": "8a027e4e8e9c843472a227ed880b4cc199397787a715749ff861803b691181e4"
   },
   {
     "Path": "scripts/Export-PublicSource.ps1",
@@ -266,8 +266,8 @@
   },
   {
     "Path": "src/KeyboardTestPanel.cs",
-    "Length": 22876,
-    "Sha256": "efd2020dfe5e0709508d17f78143caeb7ab3295724a490e356fd9c76f224932a"
+    "Length": 26433,
+    "Sha256": "e1376ebcf26e7bd310bd1df12a26449e483629a7639448c8a26920495c8f2127"
   },
   {
     "Path": "src/Models.cs",
@@ -276,8 +276,8 @@
   },
   {
     "Path": "src/PeripheralAudio.cs",
-    "Length": 30551,
-    "Sha256": "f316c8ae758088621b178bbfc21bcbed753d86682bb6a064f1aee2948a257067"
+    "Length": 30639,
+    "Sha256": "89c26edb481578ad6e8ee04b703aa746c8fa34a4f28a95a8fbd27c2366263dc4"
   },
   {
     "Path": "src/PeripheralResults.cs",
@@ -286,8 +286,8 @@
   },
   {
     "Path": "src/PeripheralTestsWindow.cs",
-    "Length": 41578,
-    "Sha256": "210a6de2b7709e42444c9c93ed6f5b264ea19444fff143bea119cb631fa46a54"
+    "Length": 43552,
+    "Sha256": "f82435e46990b02950edaade963435ee739ddee273d72f1c6ea0efcd806444f7"
   },
   {
     "Path": "src/PersistentDeviceIdentity.cs",
@@ -307,7 +307,7 @@
   {
     "Path": "src/Program.cs",
     "Length": 65563,
-    "Sha256": "a4a41f5d9a9b44b2fc5f82c73d9ba90ec9fca9dfad7808b4073a4a4b087b2fa7"
+    "Sha256": "d592e0ee7aa68729526f7843cc2da434810752b99443266b6ce41d387311a91d"
   },
   {
     "Path": "src/ScreenInventory.cs",
@@ -531,8 +531,8 @@
   },
   {
     "Path": "tests/KeyboardTestPanelTests.cs",
-    "Length": 5194,
-    "Sha256": "8981c80843e2cef750e843f6afb2ac1a56eca224eb9347848000a34f577adfc1"
+    "Length": 6465,
+    "Sha256": "eedc09c4a3f24879918a135405410179134fb28d56b2e7ecb144a25e861e4605"
   },
   {
     "Path": "tests/launcher/ArgumentProbe.cs",
@@ -631,8 +631,8 @@
   },
   {
     "Path": "tests/PeripheralAudioTests.cs",
-    "Length": 25629,
-    "Sha256": "8627ce982f1127fd8ea4be4589ac81714c611bfd290f0228f61dbb84041e2103"
+    "Length": 25632,
+    "Sha256": "78db00fcd3a4665b46d0a06c933665f6b62cf5e440041718d6cf92ff4eaa5858"
   },
   {
     "Path": "tests/PeripheralHistoryTests.cs",
@@ -641,8 +641,8 @@
   },
   {
     "Path": "tests/PeripheralWindowTests.cs",
-    "Length": 21247,
-    "Sha256": "b4fc8947f220d2c36200a795ec50d282677e851d6eaed118d8563d5314cb6d9d"
+    "Length": 25257,
+    "Sha256": "e5f0859e9df062b7cad560c3d5faaba7dce96e1d7b75e9c8ae64e98983223b7a"
   },
   {
     "Path": "tests/PersistentDeviceIdentityTests.cs",
@@ -691,8 +691,8 @@
   },
   {
     "Path": "tests/SmokeTests.cs",
-    "Length": 50543,
-    "Sha256": "bdc0ca7e9e7cceb21526a2c41365431f72a18fb5a9f4e9251a46777a2b9679db"
+    "Length": 50539,
+    "Sha256": "2131bb6bf405bb80b66ad6491ab950f91355f85fe4815ce3aa6ea49ffc2a47ea"
   },
   {
     "Path": "tests/StartupSequenceTests.cs",

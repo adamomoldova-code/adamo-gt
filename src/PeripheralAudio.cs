@@ -61,6 +61,7 @@ namespace PcPulse
     // Callbacks run on the worker thread; UI callers must dispatch without blocking it.
     public sealed class PeripheralAudio : IDisposable
     {
+        internal const int MicrophoneSeconds = 3;
         private readonly object gate = new object();
         private readonly IPeripheralWaveApi api;
         private CancellationTokenSource activeCancellation;
@@ -182,7 +183,7 @@ namespace PcPulse
             using (PeripheralWaveSession session = Open(true, deviceId, CaptureFormats(), token))
             {
                 int frameBytes = session.Format.BlockAlign;
-                int maximum = checked((int)session.Format.AverageBytesPerSecond * 5);
+                int maximum = checked((int)session.Format.AverageBytesPerSecond * MicrophoneSeconds);
                 int chunk = checked((int)session.Format.SamplesPerSecond / 20 * frameBytes);
                 byte[] captured = new byte[maximum];
                 byte[] transfer = new byte[chunk];
@@ -197,7 +198,7 @@ namespace PcPulse
                     while (written < maximum)
                     {
                         token.ThrowIfCancellationRequested();
-                        if (elapsed.Elapsed > TimeSpan.FromSeconds(8)) { throw new TimeoutException("Микрофон не вернул 5 секунд звука. Проверьте подключение и разрешения Windows."); }
+                        if (elapsed.Elapsed > TimeSpan.FromSeconds(MicrophoneSeconds + 3)) { throw new TimeoutException("Микрофон не вернул 3 секунды звука. Проверьте подключение и разрешения Windows."); }
                         PeripheralWaveBuffer buffer = session.Buffers[next];
                         if (!buffer.IsDone) { Thread.Sleep(15); continue; }
                         int recorded = buffer.RecordedBytes;
