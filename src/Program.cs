@@ -16,8 +16,8 @@ using System.Windows.Media.Imaging;
 [assembly: AssemblyTitle("ADAMO GT")]
 [assembly: AssemblyProduct("ADAMO GT")]
 [assembly: AssemblyDescription("Показатели компьютера на одном экране")]
-[assembly: AssemblyVersion("2.7.6.0")]
-[assembly: AssemblyFileVersion("2.7.6.0")]
+[assembly: AssemblyVersion("2.7.7.0")]
+[assembly: AssemblyFileVersion("2.7.7.0")]
 
 namespace PcPulse
 {
@@ -221,7 +221,7 @@ namespace PcPulse
                     var privacyDialog = new PrivacySettingsWindow(privacySettings) { Owner = window };
                     DialogViewport.Fit(privacyDialog, DialogViewport.WorkArea(window));
                     privacyDialog.ShowDialog();
-                    crmOfficeAccess.SetEnabled(privacySettings.HasChoice && privacySettings.AutomaticCrmChecks);
+                    crmOfficeAccess.SetEnabled(privacySettings.AutomaticCrmChecks);
                     applyCrmAccess();
                     refreshCrmAccess();
                 };
@@ -239,9 +239,8 @@ namespace PcPulse
                 window.Activated += delegate { refreshCrmAccess(); };
                 window.Loaded += delegate
                 {
-                    if (!privacySettings.HasChoice) { showPrivacySettings(); }
                     if (stopping) { return; }
-                    crmOfficeAccess.SetEnabled(privacySettings.HasChoice && privacySettings.AutomaticCrmChecks);
+                    crmOfficeAccess.SetEnabled(privacySettings.AutomaticCrmChecks);
                     System.Net.NetworkInformation.NetworkChange.NetworkAddressChanged += crmNetworkChanged;
                     System.Net.NetworkInformation.NetworkChange.NetworkAvailabilityChanged += crmNetworkAvailabilityChanged;
                     crmAccessTimer.Start();

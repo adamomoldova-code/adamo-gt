@@ -18,7 +18,7 @@ namespace PcPulseTests
             {
                 string path = Path.Combine(directory, "privacy.json");
                 var settings = new PrivacySettings(path);
-                Require(!settings.HasChoice && !settings.AutomaticCrmChecks, "Fresh or absent preferences never authorize network access");
+                Require(!settings.HasChoice && settings.AutomaticCrmChecks, "Fresh startup enables the anonymous office availability check without a consent prompt");
                 settings.Save(false);
                 settings = new PrivacySettings(path);
                 Require(settings.HasChoice && !settings.AutomaticCrmChecks, "Choosing local use is remembered without enabling CRM");
@@ -27,12 +27,12 @@ namespace PcPulseTests
                 Require(settings.HasChoice && settings.AutomaticCrmChecks, "An explicit choice can enable the anonymous office check");
                 string valid = File.ReadAllText(path);
                 File.WriteAllText(path, valid.Replace(PrivacySettings.PolicyVersion, "obsolete-policy"));
-                Require(!new PrivacySettings(path).AutomaticCrmChecks && !new PrivacySettings(path).HasChoice, "A changed policy needs a fresh choice");
+                Require(new PrivacySettings(path).AutomaticCrmChecks && !new PrivacySettings(path).HasChoice, "An unrecognized preference file uses the automatic office-check default");
                 foreach (string invalid in new[] { "{", "null", "{}", "[]", valid.Replace("true", "\"true\""), new string('x', 4097) })
                 {
                     File.WriteAllText(path, invalid);
                     var denied = new PrivacySettings(path);
-                    Require(!denied.HasChoice && !denied.AutomaticCrmChecks, "Corrupt, oversized or mistyped settings fail closed");
+                    Require(!denied.HasChoice && denied.AutomaticCrmChecks, "Corrupt, oversized or mistyped settings retain the default anonymous check");
                 }
                 Require(PrivacySettings.ReadPolicy().Contains("crm.adamo.md") && PrivacySettings.ReadPolicy().Contains("Removal"), "The full embedded policy includes CRM disclosure and removal instructions");
             }
@@ -50,9 +50,9 @@ namespace PcPulseTests
                 VerifyLayout(settings, 650, 520);
                 VerifyLayout(settings, 324, 300);
                 var first = new PrivacySettingsWindow(settings);
-                Require(first.CrmChoice.IsChecked == false, "CRM is unchecked on first use");
+                Require(first.CrmChoice.IsChecked == true, "The optional settings checkbox reflects the enabled automatic check");
                 first.CrmChoice.IsChecked = true; first.Close();
-                Require(!File.Exists(path) && !settings.HasChoice, "Closing the policy without saving does not grant permission");
+                Require(!File.Exists(path) && !settings.HasChoice, "Closing manual settings does not create or change saved preferences");
                 var accepted = new PrivacySettingsWindow(settings);
                 accepted.CrmChoice.IsChecked = true;
                 accepted.SaveButton.RaiseEvent(new RoutedEventArgs(System.Windows.Controls.Button.ClickEvent));
@@ -65,7 +65,7 @@ namespace PcPulseTests
                 var failing = new PrivacySettings(invalidTarget);
                 var errorDialog = new PrivacySettingsWindow(failing); errorDialog.CrmChoice.IsChecked = true;
                 errorDialog.SaveButton.RaiseEvent(new RoutedEventArgs(System.Windows.Controls.Button.ClickEvent));
-                Require(!failing.HasChoice && !failing.AutomaticCrmChecks, "A storage failure never grants consent");
+                Require(!failing.HasChoice && failing.AutomaticCrmChecks, "A storage failure retains the previous default and is reported");
                 errorDialog.Close();
             }
             finally { Directory.Delete(directory, true); }

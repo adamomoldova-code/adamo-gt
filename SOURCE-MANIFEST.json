@@ -61,13 +61,13 @@
   },
   {
     "Path": "PRIVACY.md",
-    "Length": 8832,
-    "Sha256": "15ac02fc1ce516330206512d64861a91501b675186da79c19e6af7f7a5b12648"
+    "Length": 8854,
+    "Sha256": "8444b122caf98202b6dbcec6d31e735a5b0f51e422ea7ddf59abadcb7926d72f"
   },
   {
     "Path": "README.md",
-    "Length": 9724,
-    "Sha256": "56432802355ae54956a25ecc0adc655700eac67158210e586ad3f43acb8cb2a6"
+    "Length": 9867,
+    "Sha256": "011312d1ef57a487956b050377f9d992a3afa86d38950fc347a2e15cfc9b3407"
   },
   {
     "Path": "scripts/Export-PublicSource.ps1",
@@ -301,13 +301,13 @@
   },
   {
     "Path": "src/PrivacySettings.cs",
-    "Length": 7772,
-    "Sha256": "bfb79cdbd5f0fc20d1400356a1d7f2349ad3928a1fc7d5dccb26dbc44429e9f2"
+    "Length": 7785,
+    "Sha256": "8323df5e9ea9a191df62016f9f3d0af792c557a02b41e98a324a4f2155d2c78f"
   },
   {
     "Path": "src/Program.cs",
-    "Length": 65563,
-    "Sha256": "abca105fc53c1191c1262ff0e3b2e2eeb0d577d635b3164097b4bdaecf2833d9"
+    "Length": 65425,
+    "Sha256": "305a975005edda156de9d3029f37d13f308da1c0e455891b7f45d7b62c9c2ca1"
   },
   {
     "Path": "src/ScreenInventory.cs",
@@ -656,8 +656,8 @@
   },
   {
     "Path": "tests/PrivacySettingsTests.cs",
-    "Length": 6088,
-    "Sha256": "35719bcdcc7d4bff5ef1e4b28243a9b981164c8a1f710017e1dabfa290975c21"
+    "Length": 6238,
+    "Sha256": "f1c8fd984e80041132c98d88901f12b00bc797927d12216848437c675f76bcc9"
   },
   {
     "Path": "tests/resolution/README.md",

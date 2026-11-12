@@ -19,7 +19,7 @@ namespace PcPulse
 
         internal PrivacySettings(string path)
         {
-            this.path = path;
+            this.path = path; AutomaticCrmChecks = true;
             try
             {
                 if (!File.Exists(path) || new FileInfo(path).Length > 4096) { return; }
@@ -88,7 +88,7 @@ namespace PcPulse
             bottom.Children.Add(status);
             var actions = new StackPanel { Orientation = Orientation.Horizontal, HorizontalAlignment = HorizontalAlignment.Right };
             var cancel = new Button { Content = "Închide", IsCancel = true, MinHeight = 36, Padding = new Thickness(14, 5, 14, 5), Margin = new Thickness(0, 0, 8, 0) };
-            SaveButton = new Button { Content = "Salvează și continuă", IsDefault = true, MinWidth = 168, MinHeight = 36, Padding = new Thickness(14, 5, 14, 5) };
+            SaveButton = new Button { Content = "Salvează", IsDefault = true, MinWidth = 168, MinHeight = 36, Padding = new Thickness(14, 5, 14, 5) };
             actions.Children.Add(cancel); actions.Children.Add(SaveButton); bottom.Children.Add(actions); root.Children.Add(bottom);
             var content = new StackPanel();
             content.Children.Add(new TextBlock { Text = "Datele și conexiunile aplicației", FontWeight = FontWeights.SemiBold, FontSize = 20, TextWrapping = TextWrapping.Wrap });
