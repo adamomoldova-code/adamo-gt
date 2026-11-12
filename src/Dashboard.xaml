@@ -237,7 +237,7 @@
                             <Grid.ColumnDefinitions><ColumnDefinition Width="1.1*" /><ColumnDefinition Width="1" /><ColumnDefinition Width="1.05*" /><ColumnDefinition Width="1" /><ColumnDefinition Width="0.85*" /></Grid.ColumnDefinitions>
                             <StackPanel Margin="0,0,9,0"><TextBlock x:Name="DiskHealth" Text="Нет данных" Style="{StaticResource Metric}" /><TextBlock Text="Остаток ресурса" Style="{StaticResource Label}" /><ProgressBar x:Name="DiskHealthBar" Foreground="{StaticResource Teal}" Margin="0,5,0,0" /></StackPanel>
                             <Border Grid.Column="1" Background="#D7DBDE" Margin="0,4" />
-                            <StackPanel Grid.Column="2" Margin="10,0,8,0"><TextBlock x:Name="PowerOnHours" Text="Нет данных" FontSize="25" FontWeight="SemiBold" /><TextBlock Text="Часов работы" Style="{StaticResource Label}" Margin="0,2,0,0" /></StackPanel>
+                            <StackPanel Grid.Column="2" Margin="10,0,8,0"><TextBlock x:Name="PowerOnHours" Text="Нет данных" FontSize="25" FontWeight="SemiBold" /><TextBlock Text="Дней работы" Style="{StaticResource Label}" Margin="0,2,0,0" /></StackPanel>
                             <Border Grid.Column="3" Background="#D7DBDE" Margin="0,4" />
                             <StackPanel Grid.Column="4" Margin="10,0,0,0"><TextBlock x:Name="DiskTemperature" Text="Нет данных" FontSize="25" FontWeight="SemiBold" /><TextBlock Text="Температура" Style="{StaticResource Label}" Margin="0,2,0,0" /></StackPanel>
                         </Grid>

@@ -385,7 +385,7 @@ namespace PcPulse
                 && (!progress.ReadBytes.HasValue || progress.ReadBytes > 0) && (!progress.WriteBytes.HasValue || progress.WriteBytes > 0)
                 && (!progress.WarmupSeconds.HasValue || (progress.WarmupSeconds >= 0 && progress.WarmupSeconds <= 60))
                 && (!progress.MeasurementSeconds.HasValue || (progress.MeasurementSeconds > 0 && progress.MeasurementSeconds <= 3600))
-                && (progress.Profile == "diskspd-seq-v1" || progress.Profile == "native-seq-v1")
+                && (progress.Profile == "diskspd-seq-v1" || progress.Profile == DiskSpdBenchmark.ProfileName || progress.Profile == "native-seq-v1")
                 && Text(progress.Engine, true) && Text(progress.EngineVersion, true) && Text(progress.Method, true)
                 && Text(progress.CacheMode, false) && Text(progress.Stage, false);
         }

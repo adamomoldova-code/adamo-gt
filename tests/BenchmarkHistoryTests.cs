@@ -98,6 +98,9 @@ namespace PcPulseTests
             BenchmarkHistoryResult result = store.Load(snapshot);
             Require(result.LastTestUtc == before && result.Disks.Single().WriteBytesPerSecond == 2000000000 && result.Gpus.Single().FramesPerSecond == 100,
                 "A failed manual retest preserves prior completed measurements and their date.");
+            BenchmarkProgress compact = Disk(0);
+            compact.Profile = DiskSpdBenchmark.ProfileName; compact.TestSizeBytes = DiskSpdBenchmark.FileSizeBytes;
+            Require(store.RecordDisk(snapshot, snapshot.Disks[0], compact), "The new 500 MB profile can be persisted alongside legacy history");
             BenchmarkProgress invalid = Disk(0);
             invalid.ReadBytesPerSecond = double.NaN;
             Require(!store.RecordDisk(snapshot, snapshot.Disks[0], invalid), "Non-finite readings cannot be recorded as successful speed.");

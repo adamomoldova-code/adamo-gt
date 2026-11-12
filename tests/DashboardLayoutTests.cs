@@ -12,6 +12,8 @@ namespace PcPulseTests
     {
         public static void Run()
         {
+            Assert(Display.PowerOnDays(24) == "1,0" && Display.PowerOnDays(60) == "2,5"
+                && Display.PowerOnDays(0) == "0,0" && Display.PowerOnDays(null) == "Нет данных", "SSD hours convert to elapsed working days without losing unknown or zero values");
             VerifyLayout(960, 680, false);
             VerifyLayout(1200, 720, false);
             VerifyLayout(960, 680, true);

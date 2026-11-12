@@ -14,9 +14,9 @@ namespace PcPulse
 {
     public static class DiskSpdBenchmark
     {
-        public const string ProfileName = "diskspd-seq-v1";
+        public const string ProfileName = "diskspd-seq-v2-500mb";
         public const string EngineVersion = "2.3.0";
-        public const long FileSizeBytes = 1024L * 1024 * 1024;
+        public const long FileSizeBytes = 500L * 1024 * 1024;
         public const int BlockSizeBytes = 1024 * 1024;
         public const int QueueDepth = 8;
         public const int ThreadCount = 1;
@@ -43,7 +43,7 @@ namespace PcPulse
                 WarmupSeconds = WarmupSeconds,
                 MeasurementSeconds = MeasurementSeconds,
                 CacheMode = "Кэш Windows отключён; write-through не запрошен",
-                Method = "DiskSpd 2.3 · SEQ 1 MB · Q8T1 · файл 1 GB · 5 с на чтение/запись · без кэша Windows"
+                Method = "DiskSpd 2.3 · SEQ 1 MB · Q8T1 · файл 500 MB · 5 с на чтение/запись · без кэша Windows"
             };
         }
 
@@ -63,7 +63,7 @@ namespace PcPulse
                 using (StorageTopology.BenchmarkTarget target = StorageTopology.OpenBenchmarkTarget(disk, FileSizeBytes))
                 {
                     scratch = ScratchFile.Create(target.VolumeRoot);
-                    progress.Stage = "Подготовка 1 GB случайных данных";
+                    progress.Stage = "Подготовка 500 MB случайных данных";
                     Publish(report, progress);
                     PrepareFile(scratch.Stream, FileSizeBytes, token, delegate(double fraction)
                     {

@@ -66,8 +66,8 @@
   },
   {
     "Path": "README.md",
-    "Length": 9412,
-    "Sha256": "8a027e4e8e9c843472a227ed880b4cc199397787a715749ff861803b691181e4"
+    "Length": 9724,
+    "Sha256": "56432802355ae54956a25ecc0adc655700eac67158210e586ad3f43acb8cb2a6"
   },
   {
     "Path": "scripts/Export-PublicSource.ps1",
@@ -131,13 +131,13 @@
   },
   {
     "Path": "src/BenchmarkHistory.cs",
-    "Length": 27804,
-    "Sha256": "32417026796bdffb49150db42d9f90ea6e3071ab35a4edae28fb2f31189db0f6"
+    "Length": 27856,
+    "Sha256": "c9480d71889b89227c068ef5604c64b2141ebfff8f24d68ad7450b1f3ec0a408"
   },
   {
     "Path": "src/BenchmarkSettings.cs",
-    "Length": 3181,
-    "Sha256": "b2f1b7688df064ebfb2e7122e5f20ddea22ffafe83858304c5f1997cef89eb5b"
+    "Length": 3179,
+    "Sha256": "95646b001a698c5db3f298d2aea09b247f06d14084e4d5ecc040e888ff39ef59"
   },
   {
     "Path": "src/BrandAssets.cs",
@@ -201,13 +201,13 @@
   },
   {
     "Path": "src/Dashboard.cs",
-    "Length": 54259,
-    "Sha256": "428e0fba64b09dfcaed5c110358dc7de3b17ff2e88d6ce62063204be0243862d"
+    "Length": 54541,
+    "Sha256": "7824de3b4da043742ea55b790943d9af9a5be32357467435f661cc606e8291f0"
   },
   {
     "Path": "src/Dashboard.xaml",
-    "Length": 33078,
-    "Sha256": "9e3df86b0367fc513f1ace17247952d05b77d1ae65007c947eee4e15af55f763"
+    "Length": 33076,
+    "Sha256": "22b633631bf090e3087ec9193ff08f11832593bbd80332e9dd1311b6b46dddeb"
   },
   {
     "Path": "src/DashboardViewport.cs",
@@ -231,8 +231,8 @@
   },
   {
     "Path": "src/DiskSpdBenchmark.cs",
-    "Length": 25687,
-    "Sha256": "e927ceb6326a969d35ea002ba7159b708a16133c79c2a01c8337bad28ba06898"
+    "Length": 25696,
+    "Sha256": "7a092391ae1a26453c75d19cb7e724a949b09ea0e44ae8ef0a41bd134b0f3e65"
   },
   {
     "Path": "src/DriverlessTemperatureReader.cs",
@@ -271,8 +271,8 @@
   },
   {
     "Path": "src/Models.cs",
-    "Length": 8796,
-    "Sha256": "5eb5e119232959434107cef54baa57f316d4e0f499a77d8789d820e3e8e447b0"
+    "Length": 8960,
+    "Sha256": "c92bd5895212b4e688c73b1006a4cc46045e59d053dddf1d96957661d5f10259"
   },
   {
     "Path": "src/PeripheralAudio.cs",
@@ -307,7 +307,7 @@
   {
     "Path": "src/Program.cs",
     "Length": 65563,
-    "Sha256": "d592e0ee7aa68729526f7843cc2da434810752b99443266b6ce41d387311a91d"
+    "Sha256": "abca105fc53c1191c1262ff0e3b2e2eeb0d577d635b3164097b4bdaecf2833d9"
   },
   {
     "Path": "src/ScreenInventory.cs",
@@ -351,8 +351,8 @@
   },
   {
     "Path": "src/StorageTopology.cs",
-    "Length": 17699,
-    "Sha256": "f3915240342c614766fcc7cd9f478771500e4bdc3c88e56fd5248e42842fe0ab"
+    "Length": 17661,
+    "Sha256": "2769ebd477ce5f188148ee40fce56b959091933105a3b156d9943a5d71c6ed5e"
   },
   {
     "Path": "src/StressCpuRamGpu.cs",
@@ -401,8 +401,8 @@
   },
   {
     "Path": "tests/BenchmarkHistoryTests.cs",
-    "Length": 20413,
-    "Sha256": "ad0ffdd2236e503dab72b964b333cf2e5575708ff91b572a2afb4e9a1cb57915"
+    "Length": 20723,
+    "Sha256": "a50fc52b29ac7d61df0f5b2bfab5c9e6c0d5f88b89aaa5c7b09ec353f230e64a"
   },
   {
     "Path": "tests/CameraPreviewTests.cs",
@@ -411,8 +411,8 @@
   },
   {
     "Path": "tests/ConfigurationReportTests.cs",
-    "Length": 7118,
-    "Sha256": "b698e69d8448fe3b93fcf735ba622d91e707f4592c957f596cca916ac980f445"
+    "Length": 7115,
+    "Sha256": "30856a5510f8ce9c91e0415a722c0277286aa2b253db4923030571293bf10ba2"
   },
   {
     "Path": "tests/CrmDashboardCaptureTests.cs",
@@ -461,8 +461,8 @@
   },
   {
     "Path": "tests/DashboardLayoutTests.cs",
-    "Length": 19075,
-    "Sha256": "32d62be48f75dfcd12cb3808c500662a27ba6153c339d540b89ef54c631c0452"
+    "Length": 19353,
+    "Sha256": "e2ad71c92ab8f985528343db88435a9c76643e1268c5f23daad42cbf26f0fbd4"
   },
   {
     "Path": "tests/DashboardViewportTests.cs",
@@ -476,8 +476,8 @@
   },
   {
     "Path": "tests/DiskSpdBenchmarkTests.cs",
-    "Length": 12812,
-    "Sha256": "8635943c63257277df9921b094cda0384f42889bf6f1425d455a3caac8feda8b"
+    "Length": 12809,
+    "Sha256": "8969b52dd8994151b7a0f1130bdd15da89616a965d43b7f60c75809d7a869f5f"
   },
   {
     "Path": "tests/DriverlessTemperatureTests.cs",

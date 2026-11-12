@@ -10,7 +10,7 @@ namespace PcPulse
     {
         public int SchemaVersion = 1;
         public string Profile = "quick-v2";
-        public int DiskMiB = 1024;
+        public int DiskMiB = 500;
         public int GpuWarmupSeconds = 3;
         public int GpuMeasurementSeconds = 15;
         public string Note = "";
@@ -50,7 +50,7 @@ namespace PcPulse
                 }
                 if (settings == null || settings.SchemaVersion != 1 || (settings.Profile != "quick-v1" && settings.Profile != "quick-v2")
                     || settings.DiskMiB < 64 || settings.DiskMiB > 1024 || settings.DiskMiB % 4 != 0
-                    || (settings.Profile == "quick-v2" && settings.DiskMiB != 1024)
+                    || (settings.Profile == "quick-v2" && settings.DiskMiB != 500)
                     || settings.GpuWarmupSeconds < 1 || settings.GpuWarmupSeconds > 10
                     || settings.GpuMeasurementSeconds < 5 || settings.GpuMeasurementSeconds > 30)
                 {

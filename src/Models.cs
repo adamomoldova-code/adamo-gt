@@ -216,6 +216,11 @@ namespace PcPulse
                 : Number(bytes.Value / 1000000000d, " GB", 0);
         }
 
+        public static string PowerOnDays(ulong? hours)
+        {
+            return Number(hours.HasValue ? (double?)(hours.Value / 24d) : null, "", 1);
+        }
+
         public static string Speed(double? bytes)
         {
             return Number(bytes / 1000000d, " MB/s", 1);

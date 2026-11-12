@@ -31,7 +31,7 @@ namespace PcPulseTests
                     valid.Replace("<ReadBytes>10737418240</ReadBytes>", "<ReadBytes>9223372036854775808</ReadBytes>"),
                     valid.Replace("<WriteBytes>0</WriteBytes>", "<WriteBytes>1048576</WriteBytes>"),
                     valid.Replace("<ReadCount>10240</ReadCount>", "<ReadCount>100</ReadCount>"),
-                    valid.Replace("<FileSize>1073741824</FileSize>", "<FileSize>0</FileSize>"),
+                    valid.Replace("<FileSize>524288000</FileSize>", "<FileSize>0</FileSize>"),
                     valid.Replace("<DisableOSCache>true</DisableOSCache>", "<DisableOSCache>false</DisableOSCache>"),
                     valid.Replace("<RequestCount>8</RequestCount>", "<RequestCount>1</RequestCount>"),
                     valid.Replace("<Path>workload.tmp</Path>", "<Path>C:\\user-file.txt</Path>"),
@@ -91,7 +91,7 @@ namespace PcPulseTests
                 Throws<InvalidOperationException>(delegate { DiskSpdBenchmark.ValidateVolume(invalid); }, "Only a local volume root is accepted.");
             }
             BenchmarkProgress description = DiskSpdBenchmark.DescribeProfile(7);
-            Require(description.TestSizeBytes == 1073741824 && description.BlockSizeBytes == 1048576
+            Require(description.TestSizeBytes == 524288000 && description.BlockSizeBytes == 1048576
                 && description.QueueDepth == 8 && description.ThreadCount == 1 && description.WarmupSeconds == 1
                 && description.MeasurementSeconds == 5 && description.DiskIndex == 7, "Published metadata matches the fixed workload.");
             Require(description.ReadBytesPerSecond == null && description.WriteBytesPerSecond == null, "Describing a planned test cannot fabricate measured rates.");
@@ -146,7 +146,7 @@ namespace PcPulseTests
                 + "<WriteRatio>" + (write ? "100" : "0") + "</WriteRatio><StrideSize>1048576</StrideSize><DisableOSCache>true</DisableOSCache>"
                 + "<WriteBufferContent><Pattern>random</Pattern><RandomDataSource><SizeInBytes>67108864</SizeInBytes></RandomDataSource></WriteBufferContent>"
                 + "</Target></Targets></TimeSpan></TimeSpans></Profile><TimeSpan><TestTimeSeconds>5.02</TestTimeSeconds><ThreadCount>1</ThreadCount>"
-                + "<Thread><Id>0</Id><Target><Path>workload.tmp</Path><FileSize>1073741824</FileSize><BytesCount>10737418240</BytesCount><IOCount>10240</IOCount>"
+                + "<Thread><Id>0</Id><Target><Path>workload.tmp</Path><FileSize>524288000</FileSize><BytesCount>10737418240</BytesCount><IOCount>10240</IOCount>"
                 + "<ReadBytes>" + readBytes + "</ReadBytes><ReadCount>" + (write ? "0" : "10240") + "</ReadCount>"
                 + "<WriteBytes>" + writeBytes + "</WriteBytes><WriteCount>" + (write ? "10240" : "0") + "</WriteCount></Target></Thread></TimeSpan></Results>";
         }

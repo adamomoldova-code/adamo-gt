@@ -667,7 +667,8 @@ namespace PcPulse
             SetHealth("DiskHealth", "DiskHealthBar", disk == null ? null : disk.HealthPercent);
             ((TextBlock)window.FindName("DiskHealth")).FontSize = disk != null && disk.HealthPercent.HasValue ? 28 : 14;
             ((TextBlock)window.FindName("DiskHealth")).ToolTip = "Оценка оставшегося ресурса по SMART. Это не гарантия исправности. " + (disk == null ? "" : disk.SmartSource);
-            SetText("PowerOnHours", disk != null && disk.PowerOnHours.HasValue ? disk.PowerOnHours.Value.ToString("N0", CultureInfo.GetCultureInfo("ru-RU")) : "Нет данных");
+            SetText("PowerOnHours", disk != null && disk.PowerOnHours.HasValue ? Display.PowerOnDays(disk.PowerOnHours) : "Нет данных");
+            ((TextBlock)window.FindName("PowerOnHours")).ToolTip = disk != null && disk.PowerOnHours.HasValue ? "Наработка SMART: " + disk.PowerOnHours.Value.ToString("N0", CultureInfo.GetCultureInfo("ru-RU")) + " ч. Один день = 24 часа работы." : "Наработка недоступна";
             ((TextBlock)window.FindName("PowerOnHours")).FontSize = disk != null && disk.PowerOnHours.HasValue ? 25 : 14;
             SetText("DiskTemperature", Display.Number(disk == null ? null : disk.Temperature, " °C", 0));
             ((TextBlock)window.FindName("DiskTemperature")).FontSize = disk != null && disk.Temperature.HasValue ? 25 : 14;

@@ -90,7 +90,7 @@ namespace PcPulse
             IEnumerable<Dictionary<string, object>> partitions, IEnumerable<Dictionary<string, object>> links,
             string temporaryRoot, string systemRoot, long requiredFileBytes)
         {
-            if (requiredFileBytes <= 0 || requiredFileBytes > DiskSpdBenchmark.FileSizeBytes) { throw new ArgumentOutOfRangeException("requiredFileBytes"); }
+            if (requiredFileBytes <= 0 || requiredFileBytes > 1073741824L) { throw new ArgumentOutOfRangeException("requiredFileBytes"); }
             ulong requiredFree = (ulong)(requiredFileBytes + FreeSpaceReserveBytes);
             var partitionOwners = new Dictionary<string, HashSet<uint>>(StringComparer.OrdinalIgnoreCase);
             foreach (var row in partitions ?? new Dictionary<string, object>[0])
@@ -177,7 +177,7 @@ namespace PcPulse
         internal static string ValidateVolume(string path, long requiredFileBytes)
         {
             string root = NormalizeRoot(path);
-            if (requiredFileBytes <= 0 || requiredFileBytes > DiskSpdBenchmark.FileSizeBytes) { throw new ArgumentOutOfRangeException("requiredFileBytes"); }
+            if (requiredFileBytes <= 0 || requiredFileBytes > 1073741824L) { throw new ArgumentOutOfRangeException("requiredFileBytes"); }
             DriveInfo drive = new DriveInfo(root);
             if (!drive.IsReady || drive.DriveType != DriveType.Fixed) { throw new InvalidOperationException("Для автоматического теста нужен доступный локальный фиксированный диск."); }
             if (!IsSupportedFileSystem(drive.DriveFormat)) { throw new InvalidOperationException("Автоматический тест поддерживает тома NTFS и ReFS."); }

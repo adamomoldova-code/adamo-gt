@@ -14,8 +14,8 @@ namespace PcPulseTests
             BenchmarkSettings custom = BenchmarkSettings.Parse("{\"SchemaVersion\":1,\"Profile\":\"quick-v1\",\"DiskMiB\":256,\"GpuWarmupSeconds\":2,\"GpuMeasurementSeconds\":10}");
             Require(custom.DiskMiB == 256 && custom.GpuMeasurementSeconds == 10 && custom.Note == "", "Supported profile settings must be retained");
             Require(BenchmarkSettings.Parse("{\"Profile\":\"quick-v1\"}").DiskMiB == 512, "Partial legacy settings keep the original default file size");
-            BenchmarkSettings peak = BenchmarkSettings.Parse("{\"SchemaVersion\":1,\"Profile\":\"quick-v2\",\"DiskMiB\":1024}");
-            Require(peak.Profile == "quick-v2" && peak.Note == "", "DiskSpd accepts its fixed one GiB profile");
+            BenchmarkSettings peak = BenchmarkSettings.Parse("{\"SchemaVersion\":1,\"Profile\":\"quick-v2\",\"DiskMiB\":500}");
+            Require(peak.Profile == "quick-v2" && peak.Note == "", "DiskSpd accepts its fixed 500 MB profile");
             foreach (string invalid in new[] {
                 "null", "not json", "{\"DiskMiB\":-1}", "{\"DiskMiB\":4096}", "{\"DiskMiB\":65}",
                 "{\"GpuMeasurementSeconds\":3600}", "{\"GpuWarmupSeconds\":0}", "{\"SchemaVersion\":99}", "{\"Profile\":\"unknown\"}",
@@ -24,7 +24,7 @@ namespace PcPulseTests
             })
             {
                 BenchmarkSettings settings = BenchmarkSettings.Parse(invalid);
-                Require(settings.Profile == "quick-v2" && settings.DiskMiB == 1024 && settings.GpuMeasurementSeconds == 15 && settings.Note.Length > 0, "Invalid settings must fall back with an explanation");
+                Require(settings.Profile == "quick-v2" && settings.DiskMiB == 500 && settings.GpuMeasurementSeconds == 15 && settings.Note.Length > 0, "Invalid settings must fall back with an explanation");
             }
 
             Window window = Program.LoadWindow();
