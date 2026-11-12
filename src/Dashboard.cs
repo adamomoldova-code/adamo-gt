@@ -743,7 +743,8 @@ namespace PcPulse
         {
             if (!bytes.HasValue) { return "не сохранён"; }
             return bytes.Value >= 1073741824L ? Display.Number(bytes.Value / 1073741824d, " GB", 0)
-                : Display.Number(bytes.Value / 1048576d, " MB", 0);
+                : bytes.Value >= 1048576L ? Display.Number(bytes.Value / 1048576d, " MB", 0)
+                : Display.Number(bytes.Value / 1024d, " KB", 0);
         }
 
         private bool TestsAreRunning()

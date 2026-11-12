@@ -12,21 +12,21 @@
   "Build": "MSVC v143 14.44.35207; Windows SDK10.0.26100.0; x64 Release; /MT; /Brepro; ATL14.44.35207",
   "BinarySignature": "Unsigned local build; SHA256 pinned in ADAMO GT adapter",
   "MinimumOS": "Windows 10 1803 x64, per upstream; Windows 11 target validated by ADAMO GT",
-  "Profile": "diskspd-seq-v1",
+  "Profile": "diskspd-seq-v3-128k-q32-500mb",
   "ProfileParameters": {
-    "FileBytes": 1073741824,
-    "BlockBytes": 1048576,
-    "QueueDepth": 8,
+    "FileBytes": 524288000,
+    "BlockBytes": 131072,
+    "QueueDepth": 32,
     "Threads": 1,
-    "WarmupSeconds": 1,
+    "WarmupSeconds": 5,
     "MeasurementSeconds": 5,
     "Directions": "Read then write",
     "CacheFlags": "-Su (FILE_FLAG_NO_BUFFERING); write-through not requested",
     "Affinity": "-n",
     "BufferSeparation": "-bsp",
-    "WriteBufferRandomBytes": 67108864,
-    "Preparation": "Fully write1GiB random data and flush outside measurement",
+    "WriteBufferRandomBytes": 131072,
+    "Preparation": "Fully write 500 MiB random data outside measurement; hand cached writer to a noncached read-only ownership guard without a file-replacement gap; 5 seconds of per-direction preconditioning",
     "Report": "XML bytes divided by actual TestTimeSeconds",
-    "Safety": "Owned random scratch directory and pre-created file; no raw device target; child cancellation and timeout"
+    "Safety": "Owned scratch directory, verified volume binding, continuous non-delete-sharing file ownership; no raw target; bounded child cancellation and cleanup"
   }
 }

@@ -30,14 +30,14 @@ namespace PcPulseTests
                     valid.Replace("<TestTimeSeconds>5.02</TestTimeSeconds>", "<TestTimeSeconds>5,02</TestTimeSeconds>"),
                     valid.Replace("<ReadBytes>10737418240</ReadBytes>", "<ReadBytes>9223372036854775808</ReadBytes>"),
                     valid.Replace("<WriteBytes>0</WriteBytes>", "<WriteBytes>1048576</WriteBytes>"),
-                    valid.Replace("<ReadCount>10240</ReadCount>", "<ReadCount>100</ReadCount>"),
+                    valid.Replace("<ReadCount>81920</ReadCount>", "<ReadCount>100</ReadCount>"),
                     valid.Replace("<FileSize>524288000</FileSize>", "<FileSize>0</FileSize>"),
                     valid.Replace("<DisableOSCache>true</DisableOSCache>", "<DisableOSCache>false</DisableOSCache>"),
-                    valid.Replace("<RequestCount>8</RequestCount>", "<RequestCount>1</RequestCount>"),
+                    valid.Replace("<RequestCount>32</RequestCount>", "<RequestCount>1</RequestCount>"),
                     valid.Replace("<Path>workload.tmp</Path>", "<Path>C:\\user-file.txt</Path>"),
                     valid.Replace("<Duration>5</Duration>", "<Duration>3</Duration>"),
                     valid.Replace("<ThreadsPerFile>1</ThreadsPerFile>", "<ThreadsPerFile>2</ThreadsPerFile>"),
-                    valid.Replace("<StrideSize>1048576</StrideSize>", "<Random>1048576</Random>"),
+                    valid.Replace("<StrideSize>131072</StrideSize>", "<Random>131072</Random>"),
                     valid.Replace("<WriteRatio>0</WriteRatio>", "<WriteRatio>100</WriteRatio>"),
                     valid.Replace("<BytesCount>10737418240</BytesCount>", "<BytesCount>0</BytesCount>"),
                     valid.Replace("</Results>", "<Error>Partial run</Error></Results>"),
@@ -86,14 +86,16 @@ namespace PcPulseTests
 
         public static void PreparationAndBoundaries()
         {
+            MeasurementGuard();
             foreach (string invalid in new[] { "", @"\\server\share\", @"\\.\PhysicalDrive0", @"C:\Windows\", "#0" })
             {
                 Throws<InvalidOperationException>(delegate { DiskSpdBenchmark.ValidateVolume(invalid); }, "Only a local volume root is accepted.");
             }
             BenchmarkProgress description = DiskSpdBenchmark.DescribeProfile(7);
-            Require(description.TestSizeBytes == 524288000 && description.BlockSizeBytes == 1048576
-                && description.QueueDepth == 8 && description.ThreadCount == 1 && description.WarmupSeconds == 1
+            Require(description.TestSizeBytes == 524288000 && description.BlockSizeBytes == 131072
+                && description.QueueDepth == 32 && description.ThreadCount == 1 && description.WarmupSeconds == 5
                 && description.MeasurementSeconds == 5 && description.DiskIndex == 7, "Published metadata matches the fixed workload.");
+            Require(Dashboard.DiskProfileCaption(description).Contains("SEQ 128 KB · Q32T1 · файл 500 MB"), "The displayed profile shows the real block size instead of rounding it to zero MB");
             Require(description.ReadBytesPerSecond == null && description.WriteBytesPerSecond == null, "Describing a planned test cannot fabricate measured rates.");
             Require(!DiskSpdBenchmark.BuildArguments(false).Contains("-c") && !DiskSpdBenchmark.BuildArguments(true).Contains("-c"), "Engine never creates or truncates an arbitrary target.");
 
@@ -131,6 +133,36 @@ namespace PcPulseTests
             finally { if (File.Exists(path)) { File.Delete(path); } }
         }
 
+        private static void MeasurementGuard()
+        {
+            string path = Path.Combine(Path.GetTempPath(), "ADAMO-GT-guard-" + Guid.NewGuid().ToString("N") + ".tmp");
+            try
+            {
+                using (var writer = new FileStream(path, FileMode.CreateNew, FileAccess.ReadWrite, FileShare.ReadWrite, 4096, FileOptions.WriteThrough))
+                {
+                    writer.SetLength(65536); writer.Flush(true);
+                    using (var guard = DiskSpdBenchmark.OpenMeasurementGuard(writer))
+                    {
+                        Require(guard.CanRead && !guard.CanWrite && guard.Length == 65536, "Measurement keeps a read-only ownership guard, not a cached writer");
+                        Throws<IOException>(() => File.Move(path, path + ".moved"), "The file cannot be renamed while the two guards overlap");
+                        writer.Dispose();
+                        Throws<IOException>(() => File.Delete(path), "Releasing the writer never leaves a gap allowing file replacement");
+                        using (var engine = new FileStream(path, FileMode.Open, FileAccess.ReadWrite, FileShare.ReadWrite))
+                        {
+                            engine.WriteByte(42); engine.Flush(true);
+                            engine.Position = 0; Equal(42, engine.ReadByte(), "The benchmark can read and write while the read-only guard protects the target");
+                        }
+                    }
+                }
+                using (var exclusive = new FileStream(path, FileMode.Open, FileAccess.ReadWrite, FileShare.None))
+                {
+                    Throws<IOException>(() => { using (DiskSpdBenchmark.OpenMeasurementGuard(exclusive)) { } }, "An unshareable preparation handle fails safely");
+                    Require(exclusive.CanWrite, "A failed handoff leaves the original owner intact for cleanup");
+                }
+            }
+            finally { if (File.Exists(path)) { File.Delete(path); } }
+        }
+
         private static string Invoke(FakeProcess process, CancellationToken token, int timeout)
         {
             return DiskSpdBenchmark.RunProcess("unused.exe", DiskSpdBenchmark.BuildArguments(false), "unused", token, null, delegate { return process; }, timeout);
@@ -141,14 +173,14 @@ namespace PcPulseTests
             string readBytes = write ? "0" : "10737418240";
             string writeBytes = write ? "10737418240" : "0";
             return "<Results><System><Tool><Version>2.3.0</Version></Tool></System><Profile><TimeSpans><TimeSpan>"
-                + "<Duration>5</Duration><Warmup>1</Warmup><Cooldown>0</Cooldown><DisableAffinity>true</DisableAffinity><Targets><Target>"
-                + "<Path>workload.tmp</Path><BlockSize>1048576</BlockSize><RequestCount>8</RequestCount><ThreadsPerFile>1</ThreadsPerFile>"
-                + "<WriteRatio>" + (write ? "100" : "0") + "</WriteRatio><StrideSize>1048576</StrideSize><DisableOSCache>true</DisableOSCache>"
-                + "<WriteBufferContent><Pattern>random</Pattern><RandomDataSource><SizeInBytes>67108864</SizeInBytes></RandomDataSource></WriteBufferContent>"
+                + "<Duration>5</Duration><Warmup>5</Warmup><Cooldown>0</Cooldown><DisableAffinity>true</DisableAffinity><Targets><Target>"
+                + "<Path>workload.tmp</Path><BlockSize>131072</BlockSize><RequestCount>32</RequestCount><ThreadsPerFile>1</ThreadsPerFile>"
+                + "<WriteRatio>" + (write ? "100" : "0") + "</WriteRatio><StrideSize>131072</StrideSize><DisableOSCache>true</DisableOSCache>"
+                + (write ? "<WriteBufferContent><Pattern>random</Pattern><RandomDataSource><SizeInBytes>131072</SizeInBytes></RandomDataSource></WriteBufferContent>" : "<WriteBufferContent><Pattern>sequential</Pattern></WriteBufferContent>")
                 + "</Target></Targets></TimeSpan></TimeSpans></Profile><TimeSpan><TestTimeSeconds>5.02</TestTimeSeconds><ThreadCount>1</ThreadCount>"
-                + "<Thread><Id>0</Id><Target><Path>workload.tmp</Path><FileSize>524288000</FileSize><BytesCount>10737418240</BytesCount><IOCount>10240</IOCount>"
-                + "<ReadBytes>" + readBytes + "</ReadBytes><ReadCount>" + (write ? "0" : "10240") + "</ReadCount>"
-                + "<WriteBytes>" + writeBytes + "</WriteBytes><WriteCount>" + (write ? "10240" : "0") + "</WriteCount></Target></Thread></TimeSpan></Results>";
+                + "<Thread><Id>0</Id><Target><Path>workload.tmp</Path><FileSize>524288000</FileSize><BytesCount>10737418240</BytesCount><IOCount>81920</IOCount>"
+                + "<ReadBytes>" + readBytes + "</ReadBytes><ReadCount>" + (write ? "0" : "81920") + "</ReadCount>"
+                + "<WriteBytes>" + writeBytes + "</WriteBytes><WriteCount>" + (write ? "81920" : "0") + "</WriteCount></Target></Thread></TimeSpan></Results>";
         }
 
         private sealed class FakeProcess : DiskSpdBenchmark.IDiskSpdProcess

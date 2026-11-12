@@ -66,8 +66,8 @@
   },
   {
     "Path": "README.md",
-    "Length": 9867,
-    "Sha256": "011312d1ef57a487956b050377f9d992a3afa86d38950fc347a2e15cfc9b3407"
+    "Length": 10329,
+    "Sha256": "e7d4436cebe976273ce2a05b0975c290d59fdab5400e0a472246f6e2f998fdde"
   },
   {
     "Path": "scripts/Export-PublicSource.ps1",
@@ -131,8 +131,8 @@
   },
   {
     "Path": "src/BenchmarkHistory.cs",
-    "Length": 27856,
-    "Sha256": "c9480d71889b89227c068ef5604c64b2141ebfff8f24d68ad7450b1f3ec0a408"
+    "Length": 27902,
+    "Sha256": "8096d18852fd7572b982d8f3249ece25d4d9ccac60ddb01f7cef3e2458ddfa30"
   },
   {
     "Path": "src/BenchmarkSettings.cs",
@@ -201,8 +201,8 @@
   },
   {
     "Path": "src/Dashboard.cs",
-    "Length": 54541,
-    "Sha256": "7824de3b4da043742ea55b790943d9af9a5be32357467435f661cc606e8291f0"
+    "Length": 54631,
+    "Sha256": "8eb1c39c0255947bacbdcb66194243bb228bc5af13422ff47c94c0e3d3334901"
   },
   {
     "Path": "src/Dashboard.xaml",
@@ -231,8 +231,8 @@
   },
   {
     "Path": "src/DiskSpdBenchmark.cs",
-    "Length": 25696,
-    "Sha256": "7a092391ae1a26453c75d19cb7e724a949b09ea0e44ae8ef0a41bd134b0f3e65"
+    "Length": 28224,
+    "Sha256": "aef35c56209e9baa1bdf4b934384da97efdce0b46e8979eac2775fde0ca4b3c0"
   },
   {
     "Path": "src/DriverlessTemperatureReader.cs",
@@ -306,8 +306,8 @@
   },
   {
     "Path": "src/Program.cs",
-    "Length": 65425,
-    "Sha256": "305a975005edda156de9d3029f37d13f308da1c0e455891b7f45d7b62c9c2ca1"
+    "Length": 65473,
+    "Sha256": "237c0085c41424a1124e7d5cbc6dfd9e0d232bc97bcfe76e6252c035e88feb12"
   },
   {
     "Path": "src/ScreenInventory.cs",
@@ -476,8 +476,8 @@
   },
   {
     "Path": "tests/DiskSpdBenchmarkTests.cs",
-    "Length": 12809,
-    "Sha256": "8969b52dd8994151b7a0f1130bdd15da89616a965d43b7f60c75809d7a869f5f"
+    "Length": 15128,
+    "Sha256": "8393522f5124ce2a5accb42dbe4b8500d77ba9067638fa709c0f6aefb86dc2b7"
   },
   {
     "Path": "tests/DriverlessTemperatureTests.cs",
@@ -786,8 +786,8 @@
   },
   {
     "Path": "vendor/diskspd-2.3/runtime/SOURCE.json",
-    "Length": 1632,
-    "Sha256": "fbe2128f46d8f09cdb95f740979b6f7b7a5b875918372831c1c54100709d714e"
+    "Length": 1818,
+    "Sha256": "184e69ad7becee097fbd7bbdfbb2046181ad62f366bdfe1098c59fb5630f5362"
   },
   {
     "Path": "vendor/HidSharp.LICENSE.txt",

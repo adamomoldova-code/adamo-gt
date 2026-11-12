@@ -9,18 +9,19 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Xml;
+using Microsoft.Win32.SafeHandles;
 
 namespace PcPulse
 {
     public static class DiskSpdBenchmark
     {
-        public const string ProfileName = "diskspd-seq-v2-500mb";
+        public const string ProfileName = "diskspd-seq-v3-128k-q32-500mb";
         public const string EngineVersion = "2.3.0";
         public const long FileSizeBytes = 500L * 1024 * 1024;
-        public const int BlockSizeBytes = 1024 * 1024;
-        public const int QueueDepth = 8;
+        public const int BlockSizeBytes = 128 * 1024;
+        public const int QueueDepth = 32;
         public const int ThreadCount = 1;
-        public const int WarmupSeconds = 1;
+        public const int WarmupSeconds = 5;
         public const int MeasurementSeconds = 5;
         internal const string TargetName = "workload.tmp";
         internal const string EngineSha256 = "E0C1070A8481EE0C7D1C05DE4158F50019E75F20B42D1083E98870E52C02DEFF";
@@ -43,7 +44,7 @@ namespace PcPulse
                 WarmupSeconds = WarmupSeconds,
                 MeasurementSeconds = MeasurementSeconds,
                 CacheMode = "Кэш Windows отключён; write-through не запрошен",
-                Method = "DiskSpd 2.3 · SEQ 1 MB · Q8T1 · файл 500 MB · 5 с на чтение/запись · без кэша Windows"
+                Method = "DiskSpd 2.3 · SEQ 128 KB · Q32T1 · файл 500 MB · прогрев 5 с + измерение 5 с на чтение/запись · без кэша Windows"
             };
         }
 
@@ -70,12 +71,16 @@ namespace PcPulse
                         progress.Percent = fraction * 15;
                         Publish(report, progress);
                     }, PreparationTimeoutMilliseconds);
+                    // A cached writer held open during unbuffered I/O makes NTFS
+                    // perform cache-coherency work on every request. Keep a read-only
+                    // ownership guard instead, with no gap permitting file replacement.
+                    scratch.FinishPreparation();
 
                     for (int direction = 0; direction < 2; direction++)
                     {
                         token.ThrowIfCancellationRequested();
                         bool write = direction == 1;
-                        progress.Stage = write ? "DiskSpd · запись SEQ 1 MB Q8T1" : "DiskSpd · чтение SEQ 1 MB Q8T1";
+                        progress.Stage = write ? "DiskSpd · запись SEQ 128 KB Q32T1" : "DiskSpd · чтение SEQ 128 KB Q32T1";
                         progress.Percent = write ? 55 : 15;
                         Publish(report, progress);
                         string xml = RunProcess(executable, BuildArguments(write), scratch.DirectoryPath, token,
@@ -102,7 +107,7 @@ namespace PcPulse
                 }
                 token.ThrowIfCancellationRequested();
                 progress.Percent = 100;
-                progress.Stage = "Готово · DiskSpd SEQ 1 MB Q8T1";
+                progress.Stage = "Готово · DiskSpd SEQ 128 KB Q32T1";
             }
             catch (OperationCanceledException)
             {
@@ -133,8 +138,8 @@ namespace PcPulse
         internal static string BuildArguments(bool write)
         {
             // A fixed relative target avoids both command injection and DiskSpd's ANSI path/XML escaping limitations.
-            return "-b1M -s1M -o8 -t1 -d5 -W1 -C0 -Su -n -bsp -Z64M -Rxml "
-                + (write ? "-w100" : "-w0") + " \"" + TargetName + "\"";
+            return "-b128K -s128K -o32 -t1 -d5 -W5 -C0 -Su -n -bsp -Rxml "
+                + (write ? "-w100 -Z128K" : "-w0") + " \"" + TargetName + "\"";
         }
 
         internal static FileStream OpenVerifiedEngine(string executable)
@@ -179,6 +184,29 @@ namespace PcPulse
             }
             WaitPreparation(stream.FlushAsync(token), stream, clock, timeoutMilliseconds, token);
             if (stream.Length != bytes) { throw new IOException("Подготовлен неполный тестовый файл."); }
+        }
+
+        internal static FileStream OpenMeasurementGuard(FileStream prepared)
+        {
+            if (prepared == null || !prepared.CanRead || !prepared.CanWrite || prepared.Length <= 0 || prepared.Length > FileSizeBytes)
+            { throw new InvalidOperationException("Тестовый файл не подготовлен."); }
+            // A noncached read handle protects against deletion without keeping a
+            // cached data handle alive across the writer's cleanup.
+            SafeFileHandle handle = OpenGuardFile(prepared.Name, 0x80000000, 3, IntPtr.Zero, 3, 0x68000080, IntPtr.Zero);
+            if (handle.IsInvalid)
+            {
+                int error = Marshal.GetLastWin32Error(); handle.Dispose();
+                throw new IOException("Не удалось защитить тестовый файл.", new Win32Exception(error));
+            }
+            FileStream guard;
+            try { guard = new FileStream(handle, FileAccess.Read, 4096, true); }
+            catch { handle.Dispose(); throw; }
+            try
+            {
+                if (guard.Length != prepared.Length) { throw new IOException("Размер тестового файла изменился."); }
+                return guard;
+            }
+            catch { guard.Dispose(); throw; }
         }
 
         private static void WaitPreparation(Task task, FileStream stream, Stopwatch clock, int timeoutMilliseconds, CancellationToken token)
@@ -264,8 +292,9 @@ namespace PcPulse
             RequireText(targetProfile, "DisableOSCache", "true");
             if (targetProfile.SelectNodes("Random|RandomRatio|MemoryMappedIo|BypassIO|FileSize").Count != 0) { throw InvalidResult(); }
             if (targetProfile.SelectSingleNode("WriteThrough") != null) { RequireText(targetProfile, "WriteThrough", "false"); }
-            RequireText(targetProfile, "WriteBufferContent/Pattern", "random");
-            RequireInteger(targetProfile, "WriteBufferContent/RandomDataSource/SizeInBytes", 64 * 1024 * 1024);
+            RequireText(targetProfile, "WriteBufferContent/Pattern", write ? "random" : "sequential");
+            if (write) { RequireInteger(targetProfile, "WriteBufferContent/RandomDataSource/SizeInBytes", 128 * 1024); }
+            else if (targetProfile.SelectNodes("WriteBufferContent/RandomDataSource").Count != 0) { throw InvalidResult(); }
 
             XmlNode result = Single(document, "/Results/TimeSpan");
             RequireInteger(result, "ThreadCount", ThreadCount);
@@ -469,6 +498,15 @@ namespace PcPulse
                 catch { scratch.Dispose(); throw; }
             }
 
+            public void FinishPreparation()
+            {
+                FileStream writer = Stream;
+                // Open the non-delete-sharing guard before releasing the writer.
+                // DiskSpd can read/write; replacement and renaming remain blocked.
+                Stream = OpenMeasurementGuard(writer);
+                writer.Dispose();
+            }
+
             public void Dispose()
             {
                 if (!owned) { return; }
@@ -483,6 +521,8 @@ namespace PcPulse
         [DllImport("kernel32.dll", CharSet = CharSet.Unicode, SetLastError = true, EntryPoint = "CreateDirectoryW")]
         [return: MarshalAs(UnmanagedType.Bool)]
         private static extern bool CreateDirectory(string path, IntPtr security);
+        [DllImport("kernel32.dll", CharSet = CharSet.Unicode, SetLastError = true, EntryPoint = "CreateFileW")]
+        private static extern SafeFileHandle OpenGuardFile(string path, uint access, uint sharing, IntPtr security, uint disposition, uint flags, IntPtr template);
         [DllImport("kernel32.dll", SetLastError = true)]
         [return: MarshalAs(UnmanagedType.Bool)]
         private static extern bool CancelIoEx(IntPtr file, IntPtr overlapped);
