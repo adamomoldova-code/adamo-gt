@@ -12,6 +12,7 @@ The [MIT License](LICENSE) for the original ADAMO GT code and artwork does not r
 | PawnIO.Modules embedded in LibreHardwareMonitor | 0.1.6 | LGPL-2.1 | `vendor/PawnIO.Modules-0.1.6-source.zip`, LHM third-party notices |
 | Microsoft System.* / Microsoft.Bcl.* runtime libraries | Included LHM dependencies | MIT | `vendor/Microsoft.MIT.LICENSE.txt`, LHM third-party notices |
 | smartctl and drivedb.h | 7.5 distribution | GPL-2.0-or-later | License, attribution and source tarball in `vendor/smartmontools-7.5/runtime` |
+| PCI ID Repository | 2026.11.13 | BSD-3-Clause (upstream dual-license option) | `data/pci.ids`, `vendor/PCI-IDS-LICENSE.txt`; offline hardware-ID lookup |
 | Microsoft DiskSpd | 2.3 | MIT | `vendor/diskspd-2.3/runtime/LICENSE.txt`, `SOURCE.json`; source archive and build recipe under `vendor/diskspd-2.3` |
 
 See the pinned source URLs and copyright names in `vendor/COMPONENTS.json` and the component-specific provenance files. Runtime packages carry these notices and the source required for the included smartmontools and embedded PawnIO modules.

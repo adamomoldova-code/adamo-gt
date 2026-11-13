@@ -25,6 +25,8 @@ namespace PcPulse
 
         internal GpuNative(GpuSnapshot selected)
         {
+            if (selected != null && selected.UsesBasicDisplayDriver)
+            { throw new InvalidOperationException("Установите драйвер производителя видеокарты перед GPU-тестом."); }
             try { Initialize(selected); }
             catch { Dispose(); throw; }
         }

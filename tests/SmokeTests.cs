@@ -155,6 +155,8 @@ namespace PcPulseTests
             Run("Shutdown waits for workers that finish within its deadline", ShutdownCoordinatorTests.PendingWorkersComplete);
             Run("A blocked hardware worker cannot hold shutdown indefinitely", ShutdownCoordinatorTests.DeadlineReturns);
             Run("Verified model and panel catalog rejects ambiguous or untrusted matches", HardwareCatalogTests.Run);
+            Run("Physical PCI GPU fallback preserves vendor drivers and rejects software results", InventoryRegressionTests.Gpus);
+            Run("RAID SSD evidence reaches CRM without external or stale devices", InventoryRegressionTests.Storage);
             Run("GPU timestamps, hardware identity failures, stop and shader compilation", GpuBenchmarkTests.Run);
             Run("GPU selection follows LUID across adapter reorder", GpuCompatibilityTests.Run);
             Run("Storage type uses OS disk number and verified identity", StorageTopologyTests.Types);

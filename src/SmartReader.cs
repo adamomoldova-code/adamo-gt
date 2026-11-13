@@ -16,6 +16,7 @@ namespace PcPulse
         internal bool? SmartPassed;
         internal string Status = "SMART недоступен";
         internal string Source = "";
+        internal string VerifiedSolidStateProtocol = "";
     }
 
     internal sealed class SmartReader
@@ -134,6 +135,10 @@ namespace PcPulse
             disk.SmartPassed = result.SmartPassed;
             disk.SmartStatus = result.Status;
             disk.SmartSource = result.Source;
+            disk.VerifiedSolidStateProtocol = result.VerifiedSolidStateProtocol;
+            if (StorageTopology.VerifiedCrmMedia(disk).Length > 0 && (disk.MediaType ?? "").EndsWith(" · RAID", StringComparison.OrdinalIgnoreCase)
+                && result.VerifiedSolidStateProtocol.Length > 0)
+            { disk.MediaType = "SSD · RAID"; }
         }
 
         private static bool HasData(SmartReading reading)
@@ -194,6 +199,7 @@ namespace PcPulse
             for (int index = 136; index < 144; index++) { if (buffer[start + index] != 0) { hours = null; break; } }
             reading = new SmartReading
             {
+                VerifiedSolidStateProtocol = "NVMe",
                 HealthPercent = Math.Max(0, 100d - used),
                 PowerOnHours = hours,
                 Temperature = kelvin > 0 && kelvin != ushort.MaxValue ? (double?)(kelvin - 273.15d) : null,

@@ -499,6 +499,7 @@ namespace PcPulse
             if (snapshot == null) { return; }
             int index = gpuSelector.SelectedIndex;
             GpuSnapshot gpu = index >= 0 && index < snapshot.Gpus.Count ? snapshot.Gpus[index] : null;
+            gpuSelector.ToolTip = gpu == null ? null : gpu.NameSource;
             SetText("GpuLoad", Display.Number(gpu == null ? null : gpu.Load, " %", 0));
             SetText("GpuMemory", gpu != null && gpu.MemoryBytes.HasValue && gpu.MemoryBytes.Value < 1073741824UL
                 ? Display.Number(gpu.MemoryBytes.Value / 1048576d, " MB", 0)
@@ -764,7 +765,8 @@ namespace PcPulse
         {
             bool running = TestsAreRunning();
             ((Button)window.FindName("RunTestButton")).IsEnabled = !running && !inventoryRefreshing && snapshot != null && snapshot.Disks.Count > 0;
-            ((Button)window.FindName("RunGpuTestButton")).IsEnabled = !running && !inventoryRefreshing && SelectedGpuAdapterIndex.HasValue;
+            ((Button)window.FindName("RunGpuTestButton")).IsEnabled = !running && !inventoryRefreshing && SelectedGpuAdapterIndex.HasValue
+                && snapshot != null && !snapshot.Gpus.Exists(gpu => gpu.AdapterIndex == SelectedGpuAdapterIndex && gpu.UsesBasicDisplayDriver);
             ((Button)window.FindName("StopTestButton")).IsEnabled = running;
             ((Button)window.FindName("StressTestButton")).IsEnabled = !running && !inventoryRefreshing && snapshot != null;
             var crmButton = (Button)window.FindName("CrmButton");

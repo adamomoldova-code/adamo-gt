@@ -152,10 +152,12 @@ namespace PcPulse
                 if (used <= 255) { reading.HealthPercent = Math.Max(0, 100d - used.Value); resourceSource = "NVMe Percentage Used"; }
                 ulong? warning = Unsigned(Get(root, "nvme_smart_health_information_log", "critical_warning"));
                 if (warning <= 255) { reading.CriticalWarning = (byte)warning.Value; }
+                if (used <= 255 && warning <= 255) { reading.VerifiedSolidStateProtocol = "NVMe"; }
             }
             else if (string.Equals(protocol, "ATA", StringComparison.OrdinalIgnoreCase))
             {
                 reading.HealthPercent = AtaEndurance(root, out resourceSource);
+                if (Unsigned(Get(root, "rotation_rate")) == 0) { reading.VerifiedSolidStateProtocol = "ATA"; }
             }
             else if (string.Equals(protocol, "SCSI", StringComparison.OrdinalIgnoreCase))
             {

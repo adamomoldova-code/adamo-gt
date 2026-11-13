@@ -148,18 +148,16 @@ namespace PcPulse
             Attempt(inventory, "Типы накопителей", ReadDiskTypes);
             Attempt(inventory, "Разделы накопителей", ReadDiskVolumes);
             Attempt(inventory, "Видеокарты DXGI", ReadGpuInventory);
+            Attempt(inventory, "Идентификаторы видеокарт", delegate
+            {
+                List<Dictionary<string, object>> devices = null;
+                try { devices = Query("root\\cimv2", "SELECT DeviceID, Service FROM Win32_PnPEntity WHERE PNPClass = 'Display'"); } catch { }
+                GpuIdentityInventory.Apply(inventory,
+                    Query("root\\cimv2", "SELECT Name, PNPDeviceID, InstalledDisplayDrivers FROM Win32_VideoController"), devices);
+            });
+            GpuIdentityInventory.NormalizeBasicAdapters(inventory);
             Attempt(inventory, "Информация об экранах", ReadScreenInventory);
             Attempt(inventory, "Справочник оборудования", delegate { HardwareCatalog.Default.Apply(inventory); });
-            if (inventory.Gpus.Count == 0)
-            {
-                Attempt(inventory, "Названия видеокарт", delegate
-                {
-                    foreach (Dictionary<string, object> row in Query("root\\cimv2", "SELECT Name FROM Win32_VideoController"))
-                    {
-                        inventory.Gpus.Add(new GpuSnapshot { Name = Text(row, "Name", "Видеокарта"), MemoryKind = "Объём видеопамяти недоступен" });
-                    }
-                });
-            }
 
         }
 
@@ -564,8 +562,8 @@ namespace PcPulse
                 IsAdmin = inventory.IsAdmin,
                 Issues = new List<string>(inventory.Issues)
             };
-            snapshot.Disks = inventory.Disks.Select(disk => new DiskSnapshot { Index = disk.Index, StorageIdentity = disk.StorageIdentity, PersistentHardwareId = disk.PersistentHardwareId, Name = disk.Name, SizeBytes = disk.SizeBytes, MediaType = disk.MediaType, Volumes = disk.Volumes, TestVolumeRoot = disk.TestVolumeRoot, HealthPercent = disk.HealthPercent, PowerOnHours = disk.PowerOnHours, CriticalWarning = disk.CriticalWarning, SmartPassed = disk.SmartPassed, SmartStatus = disk.SmartStatus, SmartSource = disk.SmartSource }).ToList();
-            snapshot.Gpus = inventory.Gpus.Select(gpu => new GpuSnapshot { Name = gpu.Name, PersistentHardwareId = gpu.PersistentHardwareId, MemoryBytes = gpu.MemoryBytes, MemoryKind = gpu.MemoryKind, AdapterIndex = gpu.AdapterIndex, AdapterLuidLow = gpu.AdapterLuidLow, AdapterLuidHigh = gpu.AdapterLuidHigh, SharedMemoryBytes = gpu.SharedMemoryBytes, IsIntegrated = gpu.IsIntegrated }).ToList();
+            snapshot.Disks = inventory.Disks.Select(disk => new DiskSnapshot { Index = disk.Index, StorageIdentity = disk.StorageIdentity, PersistentHardwareId = disk.PersistentHardwareId, Name = disk.Name, SizeBytes = disk.SizeBytes, MediaType = disk.MediaType, VerifiedSolidStateProtocol = disk.VerifiedSolidStateProtocol, Volumes = disk.Volumes, TestVolumeRoot = disk.TestVolumeRoot, HealthPercent = disk.HealthPercent, PowerOnHours = disk.PowerOnHours, CriticalWarning = disk.CriticalWarning, SmartPassed = disk.SmartPassed, SmartStatus = disk.SmartStatus, SmartSource = disk.SmartSource }).ToList();
+            snapshot.Gpus = inventory.Gpus.Select(gpu => new GpuSnapshot { Name = gpu.Name, NameSource = gpu.NameSource, UsesBasicDisplayDriver = gpu.UsesBasicDisplayDriver, PciNameResolved = gpu.PciNameResolved, PersistentHardwareId = gpu.PersistentHardwareId, MemoryBytes = gpu.MemoryBytes, MemoryKind = gpu.MemoryKind, AdapterIndex = gpu.AdapterIndex, AdapterLuidLow = gpu.AdapterLuidLow, AdapterLuidHigh = gpu.AdapterLuidHigh, SharedMemoryBytes = gpu.SharedMemoryBytes, IsIntegrated = gpu.IsIntegrated }).ToList();
             snapshot.Screens = inventory.Screens.Select(screen => new ScreenSnapshot { Name = screen.Name, InstanceName = screen.InstanceName, Width = screen.Width, Height = screen.Height, RefreshHz = screen.RefreshHz, IsInternal = screen.IsInternal, IsTouch = screen.IsTouch, MatrixType = screen.MatrixType, BrightnessNits = screen.BrightnessNits, Source = screen.Source }).ToList();
             return snapshot;
         }
@@ -731,7 +729,7 @@ namespace PcPulse
         private static void ReadGpuSensors(Snapshot snapshot, IHardware hardware, List<ISensor> allSensors, HashSet<GpuSnapshot> matchedGpus)
         {
             GpuSnapshot gpu = ResolveGpuSensorTarget(snapshot, hardware.Name, matchedGpus);
-            if (gpu == null) { return; }
+            if (gpu == null || gpu.UsesBasicDisplayDriver) { return; }
             if (!gpu.Temperature.HasValue)
             {
                 ApplyGpuTemperature(gpu, TemperatureReadings(allSensors), hardware.HardwareType == HardwareType.GpuIntel);

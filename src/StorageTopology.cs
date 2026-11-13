@@ -17,6 +17,22 @@ namespace PcPulse
         internal const long FreeSpaceReserveBytes = 1024L * 1024 * 1024;
         private const int MaximumExtents = 4096;
 
+        internal static string VerifiedCrmMedia(DiskSnapshot disk)
+        {
+            if (disk == null) { return ""; }
+            string[] parts = (disk.MediaType ?? "").Split('\u00b7');
+            if (parts.Length != 2) { return ""; }
+            string bus = parts[1].Trim();
+            if (new[] { "NVMe", "SATA", "ATA" }.Any(value => String.Equals(bus, value, StringComparison.OrdinalIgnoreCase))) { return disk.MediaType; }
+            // RST can expose a real NVMe/ATA device as RAID. Its successful native
+            // protocol response is evidence; the controller label alone is not.
+            // Do not widen this exception to USB, SCSI, virtual or network disks.
+            if (!String.Equals(bus, "RAID", StringComparison.OrdinalIgnoreCase)) { return ""; }
+            if (disk.VerifiedSolidStateProtocol == "NVMe") { return "SSD · NVMe"; }
+            if (disk.VerifiedSolidStateProtocol == "ATA") { return "SSD · ATA"; }
+            return "";
+        }
+
         internal static void ApplyDiskTypes(List<DiskSnapshot> disks, IEnumerable<Dictionary<string, object>> windowsDisks,
             IEnumerable<Dictionary<string, object>> physicalDisks)
         {

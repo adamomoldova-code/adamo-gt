@@ -95,6 +95,7 @@ namespace PcPulseTests
             SmartReading reading;
             byte[] response = NvmeResponse();
             Require(SmartReader.TryParseNvmeResponse(response, 560, out reading), "valid log parses");
+            Require(reading.VerifiedSolidStateProtocol == "NVMe", "Only validated native protocol response confirms an SSD behind RAID");
             Require(reading.HealthPercent == 95 && reading.PowerOnHours == 5737 && Math.Abs(reading.Temperature.Value - 33.85) < 0.001, "correct endurance, hours, Kelvin conversion");
             response[48] = 4;
             Require(SmartReader.TryParseNvmeResponse(response, 560, out reading) && reading.CriticalWarning == 4 && reading.HealthPercent == 95, "critical warning is separate from remaining endurance");

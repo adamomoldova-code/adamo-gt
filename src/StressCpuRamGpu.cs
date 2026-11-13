@@ -521,7 +521,7 @@ namespace PcPulse
         {
             ValidateStressDuration(options);
             token.ThrowIfCancellationRequested();
-            if (options.Gpu == null || !options.Gpu.AdapterIndex.HasValue)
+            if (options.Gpu == null || !options.Gpu.AdapterIndex.HasValue || options.Gpu.UsesBasicDisplayDriver)
             {
                 throw new InvalidOperationException("Аппаратный DXGI-адаптер не определён.");
             }

@@ -73,6 +73,8 @@ namespace PcPulse
         public string PersistentHardwareId = "";
         public string Name = "Накопитель";
         public string MediaType = "Тип не определён";
+        // Set only by a validated physical-device SMART protocol response.
+        internal string VerifiedSolidStateProtocol = "";
         public ulong? SizeBytes;
         public double? ReadBytesPerSecond;
         public double? WriteBytesPerSecond;
@@ -90,6 +92,9 @@ namespace PcPulse
 
     public sealed class GpuSnapshot
     {
+        public bool UsesBasicDisplayDriver;
+        public string NameSource = "";
+        internal bool PciNameResolved;
         public string Name = "Видеокарта";
         public string PersistentHardwareId = "";
         public ulong? MemoryBytes;

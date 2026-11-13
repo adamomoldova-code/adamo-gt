@@ -65,12 +65,12 @@ namespace PcPulse
         private static List<Dictionary<string, object>> Storage(IEnumerable<DiskSnapshot> disks)
         {
             var result = new List<Dictionary<string, object>>();
-            foreach (DiskSnapshot disk in (disks ?? new DiskSnapshot[0]).Where(item => item != null && KnownInternalBus(item.MediaType)).Take(MaximumComponents))
+            foreach (DiskSnapshot disk in (disks ?? new DiskSnapshot[0]).Where(item => item != null && StorageTopology.VerifiedCrmMedia(item).Length > 0).Take(MaximumComponents))
             {
                 result.Add(new Dictionary<string, object>
                 {
                     { "name", Known(disk.Name) },
-                    { "media_type", Known(disk.MediaType) },
+                    { "media_type", Known(StorageTopology.VerifiedCrmMedia(disk)) },
                     { "size_bytes", Capacity(disk.SizeBytes) },
                     { "health_percent", Percent(disk.HealthPercent) },
                     { "power_on_hours", ExactUnsigned(disk.PowerOnHours) },
@@ -80,19 +80,6 @@ namespace PcPulse
             return result;
         }
 
-        private static bool KnownInternalBus(string mediaType)
-        {
-            // StorageTopology emits "media · bus". USB/1394, remote, array,
-            // virtual and unknown transports are not sold as internal hardware.
-            // SCSI/SAS alone does not distinguish internal from external storage.
-            string[] parts = (mediaType ?? "").Split('\u00b7');
-            if (parts.Length != 2) { return false; }
-            string bus = parts[1].Trim();
-            return String.Equals(bus, "NVMe", StringComparison.OrdinalIgnoreCase)
-                || String.Equals(bus, "SATA", StringComparison.OrdinalIgnoreCase)
-                || String.Equals(bus, "ATA", StringComparison.OrdinalIgnoreCase);
-        }
-
         private static List<Dictionary<string, object>> Gpus(IEnumerable<GpuSnapshot> gpus)
         {
             var result = new List<Dictionary<string, object>>();
@@ -100,7 +87,7 @@ namespace PcPulse
             {
                 result.Add(new Dictionary<string, object>
                 {
-                    { "name", Known(gpu.Name) },
+                    { "name", gpu.UsesBasicDisplayDriver && !gpu.PciNameResolved ? null : Known(gpu.Name) },
                     { "is_integrated", gpu.IsIntegrated },
                     { "memory_bytes", ExactUnsigned(gpu.MemoryBytes) },
                     { "shared_memory_bytes", ExactUnsigned(gpu.SharedMemoryBytes) }

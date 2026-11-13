@@ -15,16 +15,6 @@
     "Sha256": "f7f09a6f28b12631d5e8d2d2c9029dc055dd5e04ec84e683e3ff31bff9178c60"
   },
   {
-    "Path": "build-single-file.ps1",
-    "Length": 4126,
-    "Sha256": "176d29e0215c6115ea8ab57a60f992e203c877d791804525e74131d4ebe85357"
-  },
-  {
-    "Path": "build.ps1",
-    "Length": 5106,
-    "Sha256": "73da1c021d4f3763e67941474859d36c3cdc80250c8db4ae8e554cd0b44226e8"
-  },
-  {
     "Path": "CODE-SIGNING.md",
     "Length": 4631,
     "Sha256": "4c97094c53563a9e79967271a3fc56d0a73aaa7dc0646b111470650bdabdfc25"
@@ -33,6 +23,41 @@
     "Path": "COMPATIBILITY.md",
     "Length": 35869,
     "Sha256": "ea6866685c09904d9022b29a49f65d9e01ba07dc6de69a80f880075da9254406"
+  },
+  {
+    "Path": "LICENSE",
+    "Length": 1078,
+    "Sha256": "b2c14af73592b03a81f2b4d2335fa64fd25e596367dc21af36e1b1be701e0e1a"
+  },
+  {
+    "Path": "PRIVACY.md",
+    "Length": 8854,
+    "Sha256": "8444b122caf98202b6dbcec6d31e735a5b0f51e422ea7ddf59abadcb7926d72f"
+  },
+  {
+    "Path": "README.md",
+    "Length": 11277,
+    "Sha256": "1f47a4f4b2e39237418c23a53483ede155151d3bb26f39c71e26af73bf32cd94"
+  },
+  {
+    "Path": "SINGLE-FILE.md",
+    "Length": 9069,
+    "Sha256": "a4340799938198dd09d03b15ff72f09c38ce4437ba8ecce12939a3b6b9e3ad63"
+  },
+  {
+    "Path": "THIRD-PARTY-NOTICES.md",
+    "Length": 2396,
+    "Sha256": "f5cde9480b9a3c3c3c1c26656cb5e26ae045cb2c2e3212832b0ec7df707473bf"
+  },
+  {
+    "Path": "build-single-file.ps1",
+    "Length": 4126,
+    "Sha256": "176d29e0215c6115ea8ab57a60f992e203c877d791804525e74131d4ebe85357"
+  },
+  {
+    "Path": "build.ps1",
+    "Length": 5106,
+    "Sha256": "73da1c021d4f3763e67941474859d36c3cdc80250c8db4ae8e554cd0b44226e8"
   },
   {
     "Path": "data/models.json",
@@ -45,29 +70,19 @@
     "Sha256": "677e0c24e2bab48c8aecdc714ff9156f01b7af691dd1cea8b7bacac4e0458618"
   },
   {
+    "Path": "data/pci.ids",
+    "Length": 1680833,
+    "Sha256": "bd44f4bc57defbc52743cedbb60a5c60aa6dad7e88d5a26d506a7e04dcf30d9f"
+  },
+  {
     "Path": "launcher/SingleFileLauncher.cs",
     "Length": 19229,
     "Sha256": "22e7151c8d82a20cd4d9e498a074131031f70e5c547e3fd94440303e5a44346d"
   },
   {
-    "Path": "LICENSE",
-    "Length": 1078,
-    "Sha256": "b2c14af73592b03a81f2b4d2335fa64fd25e596367dc21af36e1b1be701e0e1a"
-  },
-  {
     "Path": "package.ps1",
     "Length": 3237,
     "Sha256": "62f84dfd5369bb3ab3e63d92a26a6f90521fc0f0556e6fe4f47394cf94f7fc0e"
-  },
-  {
-    "Path": "PRIVACY.md",
-    "Length": 8854,
-    "Sha256": "8444b122caf98202b6dbcec6d31e735a5b0f51e422ea7ddf59abadcb7926d72f"
-  },
-  {
-    "Path": "README.md",
-    "Length": 10329,
-    "Sha256": "e7d4436cebe976273ce2a05b0975c290d59fdab5400e0a472246f6e2f998fdde"
   },
   {
     "Path": "scripts/Export-PublicSource.ps1",
@@ -85,14 +100,14 @@
     "Sha256": "835d6b66b642d8e3f40514d3c0d51df0327c8cfe5cdc4885e4c87e1262f62bca"
   },
   {
-    "Path": "signing/inner-exe.xml",
-    "Length": 451,
-    "Sha256": "874b5a9e58785f026a32de181b60bbd032fcfc94bcdb452d362b65dd5fead734"
-  },
-  {
     "Path": "signing/README.md",
     "Length": 6166,
     "Sha256": "6ee3ae89f0e37945947b9f6faefd44e6066ad0a92dd5ad78365d62dd90e594a6"
+  },
+  {
+    "Path": "signing/inner-exe.xml",
+    "Length": 451,
+    "Sha256": "874b5a9e58785f026a32de181b60bbd032fcfc94bcdb452d362b65dd5fead734"
   },
   {
     "Path": "signing/wrapper-exe.xml",
@@ -100,29 +115,9 @@
     "Sha256": "f33995af9cad17d37c3616268e9e2a43ff7356c71560b4f79151c5b0ce833a9e"
   },
   {
-    "Path": "SINGLE-FILE.md",
-    "Length": 9069,
-    "Sha256": "a4340799938198dd09d03b15ff72f09c38ce4437ba8ecce12939a3b6b9e3ad63"
-  },
-  {
     "Path": "src/ADAMO-GT.exe.config",
     "Length": 580,
     "Sha256": "dc00ffd6bd1a64285ef9de3d046af6d64c1756415c2224ee1e6318943d6dfb56"
-  },
-  {
-    "Path": "src/app.manifest",
-    "Length": 749,
-    "Sha256": "ddbe8dd595928f9be32287598b0ba2c45bb8ea4a00e0bbbd810c3d96d3cd33fa"
-  },
-  {
-    "Path": "src/assets/adamo-app-icon.png",
-    "Length": 49466,
-    "Sha256": "065ecca5c32d88784f607fa2cb6148dc2095a7b5579858ba412038c156775537"
-  },
-  {
-    "Path": "src/assets/adamo-logo-transparent.png",
-    "Length": 674993,
-    "Sha256": "580397070eefac9aace474006cf22865b9e8b0805dd12e989982bce01f76c91c"
   },
   {
     "Path": "src/BatteryRuntimeEstimator.cs",
@@ -196,13 +191,13 @@
   },
   {
     "Path": "src/CrmQuickPayload.cs",
-    "Length": 10674,
-    "Sha256": "1d1230091950a39a2f35a9917656e1e804c8ea49491feaa89b7271cae6739447"
+    "Length": 10044,
+    "Sha256": "2a66e7e21f06436c7bdb08096b6940f8f99bbef70c06c5fb778ecfe47e59102c"
   },
   {
     "Path": "src/Dashboard.cs",
-    "Length": 54631,
-    "Sha256": "8eb1c39c0255947bacbdcb66194243bb228bc5af13422ff47c94c0e3d3334901"
+    "Length": 54845,
+    "Sha256": "539f81b69976680fe14a9182435918b3218f65666039910c4002793e3fa528c7"
   },
   {
     "Path": "src/Dashboard.xaml",
@@ -241,13 +236,18 @@
   },
   {
     "Path": "src/GpuBenchmark.cs",
-    "Length": 8083,
-    "Sha256": "fc1e419fd792d5b0b699d28327d21296cce854c4527a7856a2151e997e24fc10"
+    "Length": 8327,
+    "Sha256": "9241aab403782f967f64ba60763b1e699389d2f7827f7445aee74f52d96476c0"
+  },
+  {
+    "Path": "src/GpuIdentityInventory.cs",
+    "Length": 6012,
+    "Sha256": "88b67486429d93cda7a89e381eda09674cf0cc4e3e7ce11fe27abbc617775adf"
   },
   {
     "Path": "src/GpuNative.cs",
-    "Length": 21635,
-    "Sha256": "a655106b39397f2adbb4dfdbd66e816d6602aa359f1dc7612df93167a9fb328a"
+    "Length": 21873,
+    "Sha256": "940241224717a5ce124a6c6e27b73760975eaba061da11476dfff7ea585ee428"
   },
   {
     "Path": "src/HardwareCatalog.cs",
@@ -261,8 +261,8 @@
   },
   {
     "Path": "src/HardwareMonitor.cs",
-    "Length": 69994,
-    "Sha256": "d953dc6dd84cf0325b68c78c4b78f7c22b41378ad1df93d8729dd639a05a6451"
+    "Length": 70241,
+    "Sha256": "4e60267d69a19df2b500d79a258dab7e9a25213a16888167c278a00dd976da24"
   },
   {
     "Path": "src/KeyboardTestPanel.cs",
@@ -271,8 +271,13 @@
   },
   {
     "Path": "src/Models.cs",
-    "Length": 8960,
-    "Sha256": "c92bd5895212b4e688c73b1006a4cc46045e59d053dddf1d96957661d5f10259"
+    "Length": 9215,
+    "Sha256": "e13e8a38fd2936926444df891474f4490a7e703c2f448e3c0abd448b29f37264"
+  },
+  {
+    "Path": "src/PciGpuCatalog.cs",
+    "Length": 3321,
+    "Sha256": "13dd1b04d3780fa3c72a77cec47079b71927284c6ef29b494bcf61b710490873"
   },
   {
     "Path": "src/PeripheralAudio.cs",
@@ -307,7 +312,7 @@
   {
     "Path": "src/Program.cs",
     "Length": 65473,
-    "Sha256": "237c0085c41424a1124e7d5cbc6dfd9e0d232bc97bcfe76e6252c035e88feb12"
+    "Sha256": "0280c01e0becf42c144e51598da59dce3348e7220997cf8f4eb91835a6f6a96a"
   },
   {
     "Path": "src/ScreenInventory.cs",
@@ -335,14 +340,14 @@
     "Sha256": "7319b2c9f09a5bca0343cf45e9b007233b5af3aa04b2b3569b417086acd152f3"
   },
   {
-    "Path": "src/SmartctlSmartReader.cs",
-    "Length": 14822,
-    "Sha256": "b5f280095b772ede94f0c80da9ef15f55517e15cedb2a39616439da85d2df7b4"
+    "Path": "src/SmartReader.cs",
+    "Length": 12409,
+    "Sha256": "ba20921e7f534c06077c6fdaa419c85c0968d41705dea0c51e1ec1eb9e18ab5b"
   },
   {
-    "Path": "src/SmartReader.cs",
-    "Length": 11956,
-    "Sha256": "9dc4b74528c5f4e68192c53b53ed96c59fb5a47e0a3672efc936a9d092458446"
+    "Path": "src/SmartctlSmartReader.cs",
+    "Length": 15033,
+    "Sha256": "e74c3d12a78ad7c887d217ac9fd0407595b5524011b1d529741a32dc124efaa5"
   },
   {
     "Path": "src/StartupSequence.cs",
@@ -351,13 +356,13 @@
   },
   {
     "Path": "src/StorageTopology.cs",
-    "Length": 17661,
-    "Sha256": "2769ebd477ce5f188148ee40fce56b959091933105a3b156d9943a5d71c6ed5e"
+    "Length": 18642,
+    "Sha256": "47d254fff81014ea9cd1efaa0156c1a5e607a53d62bd9fc15719d88889040221"
   },
   {
     "Path": "src/StressCpuRamGpu.cs",
-    "Length": 32734,
-    "Sha256": "b0c0771a2706f1ce3daa4bdc7a1dc4449a4271b166839a29ea83ad0c3e8d4762"
+    "Length": 32772,
+    "Sha256": "d35ae392f40c6a4f457205a9a4250cf984c94d12cf0d4dea9cd53e12a5a927f3"
   },
   {
     "Path": "src/StressSsd.cs",
@@ -366,8 +371,8 @@
   },
   {
     "Path": "src/StressTests.cs",
-    "Length": 13017,
-    "Sha256": "0b2ce4e749301edec3653bf119a7abf75f135472c11a5908fd6de12124a0e73b"
+    "Length": 13047,
+    "Sha256": "20fdd1b61e770f1d8bab0a0303edd0cf99506e6f60bc16a31f8f52bc7f2b0c69"
   },
   {
     "Path": "src/StressTestsWindow.cs",
@@ -378,6 +383,21 @@
     "Path": "src/WindowsGpuTemperatureReader.cs",
     "Length": 5268,
     "Sha256": "ba80d07fdec92f3f6b04a4219b1998ef2717a9ff05a3a788202b16c51cc1470a"
+  },
+  {
+    "Path": "src/app.manifest",
+    "Length": 749,
+    "Sha256": "ddbe8dd595928f9be32287598b0ba2c45bb8ea4a00e0bbbd810c3d96d3cd33fa"
+  },
+  {
+    "Path": "src/assets/adamo-app-icon.png",
+    "Length": 49466,
+    "Sha256": "065ecca5c32d88784f607fa2cb6148dc2095a7b5579858ba412038c156775537"
+  },
+  {
+    "Path": "src/assets/adamo-logo-transparent.png",
+    "Length": 674993,
+    "Sha256": "580397070eefac9aace474006cf22865b9e8b0805dd12e989982bce01f76c91c"
   },
   {
     "Path": "test-single-file.ps1",
@@ -516,8 +536,8 @@
   },
   {
     "Path": "tests/HardwareDetailsTests.cs",
-    "Length": 13630,
-    "Sha256": "320a9989d2aa396b8ee7a8c57db5da5d245086a2cc7bd0b29350044eb35d0633"
+    "Length": 13768,
+    "Sha256": "0199f47f77c01df3515ea7a82037f6bc0406c3d54b12a838bb1dab582c54ca26"
   },
   {
     "Path": "tests/HistoryPresentationTests.cs",
@@ -530,9 +550,114 @@
     "Sha256": "950d6c890da8e41f6e789ca80e400bf7374792cdbf806983dbcef6d932c43658"
   },
   {
+    "Path": "tests/InventoryRegressionTests.cs",
+    "Length": 8548,
+    "Sha256": "f2d72a18bd60892d6b5930d6c813ff5df30a1a3270beef72a80491d926c584f7"
+  },
+  {
     "Path": "tests/KeyboardTestPanelTests.cs",
     "Length": 6465,
     "Sha256": "eedc09c4a3f24879918a135405410179134fb28d56b2e7ecb144a25e861e4605"
+  },
+  {
+    "Path": "tests/PeripheralAudioTests.cs",
+    "Length": 25632,
+    "Sha256": "78db00fcd3a4665b46d0a06c933665f6b62cf5e440041718d6cf92ff4eaa5858"
+  },
+  {
+    "Path": "tests/PeripheralHistoryTests.cs",
+    "Length": 6291,
+    "Sha256": "02d04f053e4dffd6293aa4ae7c6718fdd450df783b6282a1c16e3e372469aa11"
+  },
+  {
+    "Path": "tests/PeripheralWindowTests.cs",
+    "Length": 25257,
+    "Sha256": "e5f0859e9df062b7cad560c3d5faaba7dce96e1d7b75e9c8ae64e98983223b7a"
+  },
+  {
+    "Path": "tests/PersistentDeviceIdentityTests.cs",
+    "Length": 1446,
+    "Sha256": "e5ca29510861e62f5dd7d05b8e3de93175f55b306fe1fd6447542a502381e1d8"
+  },
+  {
+    "Path": "tests/PortLookupTests.cs",
+    "Length": 11996,
+    "Sha256": "b49575cbd8f8485b9972b3f91a43244063ef47e7dab2100210f17abf625ec4ee"
+  },
+  {
+    "Path": "tests/PrivacySettingsTests.cs",
+    "Length": 6238,
+    "Sha256": "f1c8fd984e80041132c98d88901f12b00bc797927d12216848437c675f76bcc9"
+  },
+  {
+    "Path": "tests/SensorSetupTests.cs",
+    "Length": 6070,
+    "Sha256": "aa1d53abb1f990b8738aaa1cb55b76d212ac475463c30ff382fb7a6f4761b12c"
+  },
+  {
+    "Path": "tests/SensorStartupTests.cs",
+    "Length": 6894,
+    "Sha256": "a6086313ba4604bb5d9ed3f72c75824f9e238fda6007706e9421c4a7b792d0cc"
+  },
+  {
+    "Path": "tests/ShutdownCoordinatorTests.cs",
+    "Length": 3671,
+    "Sha256": "206e0f62e5257d58f667a86327fe1e2bb961cafba5804b456a6ce6b9a8e8c6c2"
+  },
+  {
+    "Path": "tests/SmartTemperatureFreshnessTests.cs",
+    "Length": 7040,
+    "Sha256": "fffa5f933f74b3a4877b2429b3464065c67c301731bb6c48d0c4a602a1973c91"
+  },
+  {
+    "Path": "tests/SmokeTests.cs",
+    "Length": 50790,
+    "Sha256": "1a116900542bfc37afc7d733aa31d133d83fccfb2fd2128fadbb23848a961215"
+  },
+  {
+    "Path": "tests/StartupSequenceTests.cs",
+    "Length": 15979,
+    "Sha256": "82f51d4e993a8385074a93edc56f10ebb834aa8b43f166b7513b2f013b8a0599"
+  },
+  {
+    "Path": "tests/StorageTopologyTests.cs",
+    "Length": 13122,
+    "Sha256": "4c616db8a9a51bb035ed83d20662e3956f26e9bd76662e5d91f25cbbb6a06cea"
+  },
+  {
+    "Path": "tests/StressSsdTests.cs",
+    "Length": 6260,
+    "Sha256": "31e67667dc6f5d274388c832cd09286ebe92344f57e644955505c80f368f61f6"
+  },
+  {
+    "Path": "tests/StressWindowTests.cs",
+    "Length": 56614,
+    "Sha256": "af26b3657a43be1a9c0f5f63f91b07b5cb3799663c1ca7275d8622c38d1c5afd"
+  },
+  {
+    "Path": "tests/StressWorkloadTests.cs",
+    "Length": 36055,
+    "Sha256": "d84b0e5739403a9911b441d6fb1446c87c4e84ad2a4f152ba65ee1227c67ab41"
+  },
+  {
+    "Path": "tests/TemperatureDiagnosticsTests.cs",
+    "Length": 8071,
+    "Sha256": "32b45fc2ea8460326fbd2bf3c66afd979d0f2418205291cfa7986ebd39dddb3e"
+  },
+  {
+    "Path": "tests/TemperaturePresentationTests.cs",
+    "Length": 5481,
+    "Sha256": "25cb7c89f888b407b1bc3ec8e86f1d3f8d4f4441e3e0e5c382f31b67457e258f"
+  },
+  {
+    "Path": "tests/Test-DriverlessTemperatures.ps1",
+    "Length": 1737,
+    "Sha256": "3d59848d4260bd0f5ca1ccea22f316a6e13c77049c0f87d58ee07a8eba939e3f"
+  },
+  {
+    "Path": "tests/Test-ResolutionMatrix.ps1",
+    "Length": 2367,
+    "Sha256": "455f66de84da14514ddc9f6ba1f0bdc47a30c815845a1efb68b47378f788fef8"
   },
   {
     "Path": "tests/launcher/ArgumentProbe.cs",
@@ -630,36 +755,6 @@
     "Sha256": "a64f93f056ec33753c411829c9da38a2c3d6d8d4ae3d9c73f0a4256906db5b35"
   },
   {
-    "Path": "tests/PeripheralAudioTests.cs",
-    "Length": 25632,
-    "Sha256": "78db00fcd3a4665b46d0a06c933665f6b62cf5e440041718d6cf92ff4eaa5858"
-  },
-  {
-    "Path": "tests/PeripheralHistoryTests.cs",
-    "Length": 6291,
-    "Sha256": "02d04f053e4dffd6293aa4ae7c6718fdd450df783b6282a1c16e3e372469aa11"
-  },
-  {
-    "Path": "tests/PeripheralWindowTests.cs",
-    "Length": 25257,
-    "Sha256": "e5f0859e9df062b7cad560c3d5faaba7dce96e1d7b75e9c8ae64e98983223b7a"
-  },
-  {
-    "Path": "tests/PersistentDeviceIdentityTests.cs",
-    "Length": 1446,
-    "Sha256": "e5ca29510861e62f5dd7d05b8e3de93175f55b306fe1fd6447542a502381e1d8"
-  },
-  {
-    "Path": "tests/PortLookupTests.cs",
-    "Length": 11996,
-    "Sha256": "b49575cbd8f8485b9972b3f91a43244063ef47e7dab2100210f17abf625ec4ee"
-  },
-  {
-    "Path": "tests/PrivacySettingsTests.cs",
-    "Length": 6238,
-    "Sha256": "f1c8fd984e80041132c98d88901f12b00bc797927d12216848437c675f76bcc9"
-  },
-  {
     "Path": "tests/resolution/README.md",
     "Length": 6469,
     "Sha256": "aad857a2052b2e02b7baac8bfdb169d78f4afca14397e53af3b998f262dca6f9"
@@ -668,81 +763,6 @@
     "Path": "tests/resolution/ResolutionMatrix.cs",
     "Length": 20188,
     "Sha256": "d315e581fd75590e68688b2e38670bd649d191f3b8918c6764606d6e6e2943ad"
-  },
-  {
-    "Path": "tests/SensorSetupTests.cs",
-    "Length": 6070,
-    "Sha256": "aa1d53abb1f990b8738aaa1cb55b76d212ac475463c30ff382fb7a6f4761b12c"
-  },
-  {
-    "Path": "tests/SensorStartupTests.cs",
-    "Length": 6894,
-    "Sha256": "a6086313ba4604bb5d9ed3f72c75824f9e238fda6007706e9421c4a7b792d0cc"
-  },
-  {
-    "Path": "tests/ShutdownCoordinatorTests.cs",
-    "Length": 3671,
-    "Sha256": "206e0f62e5257d58f667a86327fe1e2bb961cafba5804b456a6ce6b9a8e8c6c2"
-  },
-  {
-    "Path": "tests/SmartTemperatureFreshnessTests.cs",
-    "Length": 7040,
-    "Sha256": "fffa5f933f74b3a4877b2429b3464065c67c301731bb6c48d0c4a602a1973c91"
-  },
-  {
-    "Path": "tests/SmokeTests.cs",
-    "Length": 50539,
-    "Sha256": "2131bb6bf405bb80b66ad6491ab950f91355f85fe4815ce3aa6ea49ffc2a47ea"
-  },
-  {
-    "Path": "tests/StartupSequenceTests.cs",
-    "Length": 15979,
-    "Sha256": "82f51d4e993a8385074a93edc56f10ebb834aa8b43f166b7513b2f013b8a0599"
-  },
-  {
-    "Path": "tests/StorageTopologyTests.cs",
-    "Length": 13122,
-    "Sha256": "4c616db8a9a51bb035ed83d20662e3956f26e9bd76662e5d91f25cbbb6a06cea"
-  },
-  {
-    "Path": "tests/StressSsdTests.cs",
-    "Length": 6260,
-    "Sha256": "31e67667dc6f5d274388c832cd09286ebe92344f57e644955505c80f368f61f6"
-  },
-  {
-    "Path": "tests/StressWindowTests.cs",
-    "Length": 56614,
-    "Sha256": "af26b3657a43be1a9c0f5f63f91b07b5cb3799663c1ca7275d8622c38d1c5afd"
-  },
-  {
-    "Path": "tests/StressWorkloadTests.cs",
-    "Length": 36055,
-    "Sha256": "d84b0e5739403a9911b441d6fb1446c87c4e84ad2a4f152ba65ee1227c67ab41"
-  },
-  {
-    "Path": "tests/TemperatureDiagnosticsTests.cs",
-    "Length": 8071,
-    "Sha256": "32b45fc2ea8460326fbd2bf3c66afd979d0f2418205291cfa7986ebd39dddb3e"
-  },
-  {
-    "Path": "tests/TemperaturePresentationTests.cs",
-    "Length": 5481,
-    "Sha256": "25cb7c89f888b407b1bc3ec8e86f1d3f8d4f4441e3e0e5c382f31b67457e258f"
-  },
-  {
-    "Path": "tests/Test-DriverlessTemperatures.ps1",
-    "Length": 1737,
-    "Sha256": "3d59848d4260bd0f5ca1ccea22f316a6e13c77049c0f87d58ee07a8eba939e3f"
-  },
-  {
-    "Path": "tests/Test-ResolutionMatrix.ps1",
-    "Length": 2367,
-    "Sha256": "455f66de84da14514ddc9f6ba1f0bdc47a30c815845a1efb68b47378f788fef8"
-  },
-  {
-    "Path": "THIRD-PARTY-NOTICES.md",
-    "Length": 2240,
-    "Sha256": "88d1e6d910c5abcef194e449ad581ebed2aef692a1e7df8af62f7fb1fe27315b"
   },
   {
     "Path": "vendor/BlackSharp.Core.nupkg",
@@ -758,36 +778,6 @@
     "Path": "vendor/DiskInfoToolkit.nupkg",
     "Length": 4333121,
     "Sha256": "a997f0b3701e20b2ab9296e07ee4f74f877e75015277fb6bd314ade1e2c4db13"
-  },
-  {
-    "Path": "vendor/diskspd-2.3/build-engine.ps1",
-    "Length": 3796,
-    "Sha256": "64b149575ffcf4665f10e8a8e9702824f2efdc9c0ea0f5bc3ad1b6f8642327aa"
-  },
-  {
-    "Path": "vendor/diskspd-2.3/BuildOverrides.props",
-    "Length": 480,
-    "Sha256": "ba4bffa0012cde0a28d63de24231dce04d7e3a22f31e6ca73bb86d01c6e84c05"
-  },
-  {
-    "Path": "vendor/diskspd-2.3/diskspd-v2.3-source.zip",
-    "Length": 381095,
-    "Sha256": "e47a390810467ce79777d7fe34878920394921f4bdd4c146c1c19119ab1356f3"
-  },
-  {
-    "Path": "vendor/diskspd-2.3/runtime/diskspd.exe",
-    "Length": 821760,
-    "Sha256": "e0c1070a8481ee0c7d1c05de4158f50019e75f20b42d1083e98870e52c02deff"
-  },
-  {
-    "Path": "vendor/diskspd-2.3/runtime/LICENSE.txt",
-    "Length": 1076,
-    "Sha256": "51735c96cc8534146e63277870ee9ce2cbe827f64a6c8fef03c7c0aa73a7a8ae"
-  },
-  {
-    "Path": "vendor/diskspd-2.3/runtime/SOURCE.json",
-    "Length": 1818,
-    "Sha256": "184e69ad7becee097fbd7bbdfbb2046181ad62f366bdfe1098c59fb5630f5362"
   },
   {
     "Path": "vendor/HidSharp.LICENSE.txt",
@@ -935,6 +925,11 @@
     "Sha256": "cfc21f5e8bd655ae997eec916138b707b1d290b83272c02a95c9f821b8c87310"
   },
   {
+    "Path": "vendor/PCI-IDS-LICENSE.txt",
+    "Length": 1899,
+    "Sha256": "4b954449c3dea298e7ffeab8283e494a5b375e8d65aa74f14150d38962f6c6c5"
+  },
+  {
     "Path": "vendor/PawnIO.Modules-0.1.6-source.zip",
     "Length": 1002367,
     "Sha256": "665b2f7a028f8a317bc35cd6fbf64986115909239019ff2d30d19260d7dd0982"
@@ -945,14 +940,39 @@
     "Sha256": "57c893824a68c71538055f242586616d4205a671c300897c21b2a6f88270ce64"
   },
   {
+    "Path": "vendor/diskspd-2.3/BuildOverrides.props",
+    "Length": 480,
+    "Sha256": "ba4bffa0012cde0a28d63de24231dce04d7e3a22f31e6ca73bb86d01c6e84c05"
+  },
+  {
+    "Path": "vendor/diskspd-2.3/build-engine.ps1",
+    "Length": 3796,
+    "Sha256": "64b149575ffcf4665f10e8a8e9702824f2efdc9c0ea0f5bc3ad1b6f8642327aa"
+  },
+  {
+    "Path": "vendor/diskspd-2.3/diskspd-v2.3-source.zip",
+    "Length": 381095,
+    "Sha256": "e47a390810467ce79777d7fe34878920394921f4bdd4c146c1c19119ab1356f3"
+  },
+  {
+    "Path": "vendor/diskspd-2.3/runtime/LICENSE.txt",
+    "Length": 1076,
+    "Sha256": "51735c96cc8534146e63277870ee9ce2cbe827f64a6c8fef03c7c0aa73a7a8ae"
+  },
+  {
+    "Path": "vendor/diskspd-2.3/runtime/SOURCE.json",
+    "Length": 1818,
+    "Sha256": "184e69ad7becee097fbd7bbdfbb2046181ad62f366bdfe1098c59fb5630f5362"
+  },
+  {
+    "Path": "vendor/diskspd-2.3/runtime/diskspd.exe",
+    "Length": 821760,
+    "Sha256": "e0c1070a8481ee0c7d1c05de4158f50019e75f20b42d1083e98870e52c02deff"
+  },
+  {
     "Path": "vendor/smartmontools-7.5/runtime/AUTHORS.txt",
     "Length": 2182,
     "Sha256": "f8cd642bf9fb460264ee221e5b2b58f4c0d6f1a038ac962693fd14b911a9bb98"
-  },
-  {
-    "Path": "vendor/smartmontools-7.5/runtime/checksums64.txt",
-    "Length": 1963,
-    "Sha256": "0e18d22d613ce78ea883e53508bed61b90778d99d296979406ffb842260e25bc"
   },
   {
     "Path": "vendor/smartmontools-7.5/runtime/COPYING.txt",
@@ -960,14 +980,24 @@
     "Sha256": "189b1af95d661151e054cea10c91b3d754e4de4d3fecfb074c1fb29476f7167b"
   },
   {
-    "Path": "vendor/smartmontools-7.5/runtime/drivedb.h",
-    "Length": 267943,
-    "Sha256": "dd39c6a520d38895da61923fe26fe7c9c5eb3f42325f2e4477a06ed7a61966d0"
-  },
-  {
     "Path": "vendor/smartmontools-7.5/runtime/README.txt",
     "Length": 3052,
     "Sha256": "49c814dbd71bba397b2c8a3c7d624b8cc6169b5c5e188a0977a25c8208d1ef9a"
+  },
+  {
+    "Path": "vendor/smartmontools-7.5/runtime/SOURCE.json",
+    "Length": 1142,
+    "Sha256": "3117dfc93b5c927fc3dde829473cd2acf6a36014364a4b59c00311c35169ba41"
+  },
+  {
+    "Path": "vendor/smartmontools-7.5/runtime/checksums64.txt",
+    "Length": 1963,
+    "Sha256": "0e18d22d613ce78ea883e53508bed61b90778d99d296979406ffb842260e25bc"
+  },
+  {
+    "Path": "vendor/smartmontools-7.5/runtime/drivedb.h",
+    "Length": 267943,
+    "Sha256": "dd39c6a520d38895da61923fe26fe7c9c5eb3f42325f2e4477a06ed7a61966d0"
   },
   {
     "Path": "vendor/smartmontools-7.5/runtime/smartctl.exe",
@@ -978,10 +1008,5 @@
     "Path": "vendor/smartmontools-7.5/runtime/smartmontools-7.5.tar.gz",
     "Length": 1122317,
     "Sha256": "690b83ca331378da9ea0d9d61008c4b22dde391387b9bbad7f29387f2595f76e"
-  },
-  {
-    "Path": "vendor/smartmontools-7.5/runtime/SOURCE.json",
-    "Length": 1142,
-    "Sha256": "3117dfc93b5c927fc3dde829473cd2acf6a36014364a4b59c00311c35169ba41"
   }
 ]

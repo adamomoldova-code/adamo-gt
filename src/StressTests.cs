@@ -30,7 +30,7 @@ namespace PcPulse
             if (DurationSeconds < 1 || DurationSeconds > 900) { throw new ArgumentException("Длительность: от 1 до 900 секунд."); }
             if (RamMiB < 0) { throw new ArgumentException("Недопустимый объём памяти."); }
             if ((Components & StressComponent.Ssd) != 0 && Disk == null) { throw new ArgumentException("Выберите накопитель."); }
-            if ((Components & StressComponent.Gpu) != 0 && (Gpu == null || !Gpu.AdapterIndex.HasValue)) { throw new ArgumentException("Аппаратный GPU не определён."); }
+            if ((Components & StressComponent.Gpu) != 0 && (Gpu == null || !Gpu.AdapterIndex.HasValue || Gpu.UsesBasicDisplayDriver)) { throw new ArgumentException("Аппаратный GPU не определён."); }
         }
     }
 

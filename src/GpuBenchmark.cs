@@ -29,6 +29,8 @@ namespace PcPulse
             try
             {
                 token.ThrowIfCancellationRequested();
+                if (adapter != null && adapter.UsesBasicDisplayDriver)
+                { throw new InvalidOperationException("Установите драйвер производителя видеокарты перед GPU-тестом."); }
                 if (adapter == null || !adapter.AdapterIndex.HasValue)
                 {
                     throw new InvalidOperationException("Аппаратный DXGI-адаптер не определён.");
