@@ -6,6 +6,10 @@ ADAMO GT displays CPU, RAM, GPU, storage, battery, display and model information
 
 Project and downloads: [ADAMO.MD](https://adamo.md/ro/blog/adamo-gt-verificare-laptop-pc).
 
+## Version 2.7.11
+
+CRM association support: a server-confirmed hardware configuration can receive new units under an existing product. When the CRM requires review, the quantity/condition dialog shows only server-issued product choices, disables known incompatible configurations, and requires explicit confirmation. The frozen screenshot, quantity, condition and intake identifier survive retries and restarts; a choice cannot be changed after a potentially committed request. Existing published products are accepted without claiming a new product was created. This requires the matching CRM backend update. Before sending receipt data, the client requires the server to explicitly confirm association support; an older backend is rejected without submitting stock or the screenshot. Existing units and historical receipts are not moved or merged automatically.
+
 ## Version 2.7.10
 
 System RAM inventory now excludes ROM/Flash entries and devices unambiguously assigned by Windows to video, flash, nonvolatile or cache memory arrays. Capacity is not blindly rounded; unknown ownership is retained. The same filtered modules drive installed capacity, slot counts, type and speed. CRM specifications use compact manufacturer and CPU/GPU descriptions, preserve the full configuration SKU separately, and omit unknown fragments from mixed RAM-type strings. Panasonic CF/FZ family labels are shortened only when the firmware model equals the configuration SKU. Existing CRM products and printed jobs are not modified automatically. This version remains unsigned.

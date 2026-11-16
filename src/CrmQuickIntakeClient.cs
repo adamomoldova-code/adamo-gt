@@ -21,11 +21,25 @@ namespace PcPulse
         public string CapturedAt { get; set; }
         public Dictionary<string, object> DetectedSpecs { get; set; }
         public string ScreenshotBase64 { get; set; }
+        public string AssociationToken { get; set; }
     }
 
+    public sealed class CrmQuickAssociationChoice
+    {
+        public string Name { get; set; }
+        public string Token { get; set; }
+        public string Reason { get; set; }
+        public override string ToString() { return Name + (String.IsNullOrEmpty(Reason) ? "" : " — " + Reason); }
+    }
+    public sealed class CrmQuickAssociationException : Exception
+    {
+        public List<CrmQuickAssociationChoice> Choices { get; private set; }
+        public CrmQuickAssociationException(List<CrmQuickAssociationChoice> choices) : base("Alege produsul din CRM.") { Choices = choices; }
+    }
     public sealed class CrmQuickIntakeResult
     {
         public string ProductId { get; set; }
+        public bool ProductCreated { get; set; }
         public string IntakeId { get; set; }
         public string ImageStatus { get; set; }
         public string PrintStatus { get; set; }
@@ -50,6 +64,7 @@ namespace PcPulse
                 request.AllowAutoRedirect = false;
                 request.CachePolicy = new System.Net.Cache.RequestCachePolicy(System.Net.Cache.RequestCacheLevel.NoCacheNoStore);
                 request.Timeout = 90000; request.ReadWriteTimeout = 90000;
+                request.Headers["X-ADAMO-GT-Protocol"] = "product-association-v1";
                 request.Accept = "application/json"; request.ContentType = "application/json; charset=utf-8";
                 if (!String.IsNullOrEmpty(bearer)) { request.Headers["Authorization"] = "Bearer " + bearer; }
                 if (!String.IsNullOrEmpty(idempotencyKey)) { request.Headers["Idempotency-Key"] = idempotencyKey; }
@@ -114,6 +129,8 @@ namespace PcPulse
         private DateTime expiresAtUtc;
 
         public virtual CrmQuickSubmission Pending { get; protected set; }
+        private bool associationSupported;
+        private List<CrmQuickAssociationChoice> associationChoices;
         public virtual bool HasPending { get { return Pending != null; } }
         public virtual bool IsAuthenticated { get { return !disposed && !String.IsNullOrEmpty(bearer) && expiresAtUtc > DateTime.UtcNow; } }
 
@@ -137,7 +154,7 @@ namespace PcPulse
                 token.ThrowIfCancellationRequested();
                 entered = await operation.WaitAsync(0, token);
                 if (!entered) { throw new CrmException("Запрос CRM уже выполняется."); }
-                bearer = null; expiresAtUtc = DateTime.MinValue;
+                bearer = null; expiresAtUtc = DateTime.MinValue; associationSupported = false;
                 var response = await Request("/v1/adamo-gt/v2/session", Json().Serialize(new { client_id = clientId }), null, null, token);
                 CheckDisposed();
                 var data = Parse(response.Body);
@@ -148,6 +165,7 @@ namespace PcPulse
                     || !Int32.TryParse(Text(data, "expires_in"), NumberStyles.None, CultureInfo.InvariantCulture, out seconds) || seconds < 1 || seconds > 600)
                     throw new CrmException("CRM не подтвердил сессию. Повторите попытку.");
                 bearer = candidate; expiresAtUtc = DateTime.UtcNow.AddSeconds(seconds);
+                associationSupported = BooleanIs(data, "product_association_supported", true);
             }
             finally { if (entered) { operation.Release(); } EndOperation(); }
         }
@@ -160,6 +178,7 @@ namespace PcPulse
             {
                 token.ThrowIfCancellationRequested();
                 if (!IsAuthenticated) { throw new CrmException("Повторите подключение к CRM. Сохранённая отправка останется доступной.", 401); }
+                if (!associationSupported) { throw new CrmException("Integrarea CRM trebuie actualizată pentru asocierea produselor.", 426); }
                 entered = await operation.WaitAsync(0, token);
                 if (!entered) { throw new CrmException("Отправка уже выполняется."); }
                 string body = BuildBody(submission);
@@ -184,6 +203,38 @@ namespace PcPulse
             finally { if (entered) { operation.Release(); } EndOperation(); }
         }
 
+        public virtual bool CancelUncommittedAssociation()
+        {
+            BeginOperation(); bool entered = false;
+            try
+            {
+                entered = operation.Wait(0);
+                if (!entered || associationChoices == null || Pending == null) { return false; }
+                // Only this response guarantees that no receipt/stock was committed.
+                ClearJournal(); associationChoices = null; return true;
+            }
+            finally { if (entered) { operation.Release(); } EndOperation(); }
+        }
+
+        public virtual void SelectAssociation(string choiceToken)
+        {
+            BeginOperation();
+            bool entered = false;
+            try
+            {
+                entered = operation.Wait(0);
+                if (!entered) { throw new CrmException("Отправка уже выполняется."); }
+                if (Pending == null || associationChoices == null || String.IsNullOrEmpty(choiceToken)
+                    || !associationChoices.Exists(c => c.Token == choiceToken && !String.IsNullOrEmpty(c.Token)))
+                { throw new CrmException("Alege un produs oferit de CRM."); }
+                Pending.AssociationToken = choiceToken;
+                pendingBody = BuildBody(Pending);
+                SaveJournal();
+                associationChoices = null;
+            }
+            finally { if (entered) { operation.Release(); } EndOperation(); }
+        }
+
         internal static string BuildBody(CrmQuickSubmission value)
         {
             Guid operationId; DateTime captured;
@@ -197,13 +248,19 @@ namespace PcPulse
             if (value.DetectedSpecs == null || value.DetectedSpecs.Count == 0 || Json().Serialize(value.DetectedSpecs).Length > 128 * 1024)
                 throw new CrmException("Характеристики компьютера ещё не готовы.");
             ValidatePng(value.ScreenshotBase64);
-            return Json().Serialize(new Dictionary<string, object> {
+            var body = new Dictionary<string, object> {
                 { "client_intake_id", value.ClientIntakeId },
                 { "selection", new { quantity = value.Quantity, condition = value.Condition } },
                 { "source", new { provider = "ADAMO_GT", app_version = value.AppVersion, captured_at = value.CapturedAt, page = 1 } },
                 { "detected_specs", value.DetectedSpecs },
                 { "screenshot", new { mime = "image/png", @base64 = value.ScreenshotBase64 } }
-            });
+            };
+            if (!String.IsNullOrEmpty(value.AssociationToken))
+            {
+                if (value.AssociationToken.Length > 4096 || value.AssociationToken.IndexOfAny(new[] {'\r','\n'}) >= 0) { throw new CrmException("Alegerea produsului nu este validă."); }
+                body["association_token"] = value.AssociationToken;
+            }
+            return Json().Serialize(body);
         }
 
         private static CrmQuickIntakeResult ParseResult(string body, CrmQuickSubmission pending)
@@ -217,7 +274,8 @@ namespace PcPulse
                 || !Int64.TryParse(Text(receipt, "id"), out receiptId) || receiptId <= 0
                 || !Int32.TryParse(Text(receipt, "quantity"), out receiptQuantity) || receiptQuantity != pending.Quantity
                 || Text(data, "client_intake_id") != pending.ClientIntakeId
-                || !BooleanIs(product, "is_published", false) || !BooleanIs(product, "needs_enrichment", true))
+                || (!BooleanIs(product, "is_published", false) && !(BooleanIs(product, "created", false) && BooleanIs(product, "is_published", true)))
+                || !BooleanIs(product, "needs_enrichment", true))
                 throw new CrmException("CRM не подтвердил созданный товар. Повторите сохранённую отправку.");
             var units = Array(data, "inventory_units");
             var unitIds = new HashSet<long>(); var codes = new HashSet<string>(StringComparer.Ordinal);
@@ -242,7 +300,7 @@ namespace PcPulse
             bool printConfirmed = (printStatus == "queued" || printStatus == "processing" || printStatus == "completed")
                 && Guid.TryParse(Text(print, "job_id"), out jobId) && jobId != Guid.Empty
                 && Int32.TryParse(Text(print, "total_labels"), out count) && count == pending.Quantity;
-            return new CrmQuickIntakeResult { ProductId = productId.ToString(CultureInfo.InvariantCulture), IntakeId = intakeId.ToString(CultureInfo.InvariantCulture),
+            return new CrmQuickIntakeResult { ProductCreated = BooleanIs(product, "created", true), ProductId = productId.ToString(CultureInfo.InvariantCulture), IntakeId = intakeId.ToString(CultureInfo.InvariantCulture),
                 ImageStatus = imageStatus, PrintStatus = printStatus, Completed = imageConfirmed && printConfirmed };
         }
 
@@ -260,10 +318,32 @@ namespace PcPulse
                 }
                 if (response != null && (response.StatusCode == 200 || response.StatusCode == 201)) { return response; }
                 int status = response == null ? 0 : response.StatusCode;
+                if (status == 409 && path == "/v1/adamo-gt/v2/product-intakes" && response != null)
+                {
+                    var rejected = Parse(response.Body);
+                    if (Text(rejected, "code") == "product_association_required")
+                    {
+                        var options = Array(rejected, "choices");
+                        if (options.Count < 1 || options.Count > 41) { throw new CrmException("Lista produselor nu este validă.",409); }
+                        var choices = new List<CrmQuickAssociationChoice>();
+                        var tokens = new HashSet<string>(StringComparer.Ordinal);
+                        foreach (var option in options)
+                        {
+                            var row = option as Dictionary<string,object>;
+                            string name = row == null ? "" : Text(row,"name"), value = row == null ? "" : Text(row,"token"), reason = row == null ? "" : Text(row,"reason");
+                            if (String.IsNullOrWhiteSpace(name) || name.Length > 1000 || value.Length > 4096 || reason.Length > 500
+                                || (value.Length > 0 && !tokens.Add(value))) { throw new CrmException("Lista produselor nu este validă.",409); }
+                            choices.Add(new CrmQuickAssociationChoice { Name=name,Token=value,Reason=reason });
+                        }
+                        if (tokens.Count == 0) { throw new CrmException("CRM nu a oferit nicio alegere validă.",409); }
+                        associationChoices = choices;
+                        throw new CrmQuickAssociationException(choices);
+                    }
+                }
                 string message = "CRM временно недоступен. Повторите сохранённую отправку.";
                 switch (status)
                 {
-                    case 401: bearer = null; expiresAtUtc = DateTime.MinValue; message = "Пароль не принят или сеанс истёк. Введите пароль ещё раз."; break;
+                    case 401: bearer = null; expiresAtUtc = DateTime.MinValue; message = "Сеанс истёк. Повторите подключение к CRM."; break;
                     case 403: bearer = null; expiresAtUtc = DateTime.MinValue; message = "Отправка доступна только из офиса."; break;
                     case 404: message = "Новая интеграция CRM ещё не включена."; break;
                     case 409: message = "CRM обнаружил конфликт отправки. Проверьте товар в CRM; новая отправка не создана."; break;

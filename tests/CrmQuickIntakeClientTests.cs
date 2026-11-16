@@ -15,9 +15,67 @@ namespace PcPulseTests
     {
         public static void Run()
         {
-            TestContract(); TestSessionFailures(); TestEncryptedExactReplay(); TestReauthentication();
+            TestOldBackendCannotCreateAnotherDraft(); TestAssociationChoicesAndPublishedProduct(); TestContract(); TestSessionFailures(); TestEncryptedExactReplay(); TestReauthentication();
             TestResponseVerification(); TestConcurrencyAndDisposal(); TestCancellation(); TestDamagedJournal();
             Console.WriteLine("PASS quick CRM: scoped login, minimal wire contract, encrypted exact replay, 401 recovery, receipt/image/print verification and concurrency");
+        }
+
+        private static void TestAssociationChoicesAndPublishedProduct()
+        {
+            var transport = new FakeTransport(); string root = Temp(); var value=Submission();
+            string firstBody;
+            using(var client = new CrmQuickIntakeClient(transport,root))
+            {
+                Login(client);
+                transport.AssociationResponse=new CrmHttpResponse { StatusCode=409, Body=CrmQuickIntakeClient.Json().Serialize(new {
+                    code="product_association_required", choices=new [] {
+                        new { name="ID 1450 (CRM 344) · Different CPU", token=(string)null, reason="Procesor diferit" },
+                        new { name="ID 1670 · Existing product", token="server-signed-choice", reason=(string)null },
+                        new { name="Creează produs nou", token="server-signed-new", reason=(string)null }
+                    }}) };
+                var choice=RequireThrows<CrmQuickAssociationException>(()=>client.SubmitAsync(value,CancellationToken.None).GetAwaiter().GetResult(),"Requires explicit choice before receiving stock");
+                Require(choice.Choices.Count==3 && client.HasPending,"Frozen submission remains recoverable during association");
+                Require(client.CancelUncommittedAssociation() && !client.HasPending,"Cancel of a verified preflight releases the original quantity/condition without a stock operation");
+                RequireThrows<CrmQuickAssociationException>(()=>client.SubmitAsync(value,CancellationToken.None).GetAwaiter().GetResult(),"A cancelled preflight may be started again explicitly");
+                firstBody=transport.Calls.Last().Body;
+                RequireThrows<CrmException>(()=>client.SelectAssociation("arbitrary-product-id"),"Only a server-offered token may change the pending choice");
+                client.SelectAssociation("server-signed-choice");
+                Require(client.Pending.AssociationToken=="server-signed-choice","Choice added to the exact frozen operation");
+                Require(!client.CancelUncommittedAssociation(),"A chosen or potentially submitted operation cannot be abandoned as a preflight");
+                RequireThrows<CrmException>(()=>client.SelectAssociation("server-signed-new"),"Do not change selection after a request might have started");
+            }
+            transport.AssociationResponse=null;
+            transport.MutateIntake = d=>{var product=(Dictionary<string,object>)d["product"];product["created"]=false;product["is_published"]=true;};
+            using(var client=new CrmQuickIntakeClient(transport,root))
+            {
+                Require(client.HasPending && client.Pending.AssociationToken=="server-signed-choice","Choice survives restart in the encrypted journal");
+                Login(client); var result=client.SubmitAsync(client.Pending,CancellationToken.None).GetAwaiter().GetResult();
+                Require(result.Completed && !result.ProductCreated && !client.HasPending,"Existing published product is accepted; successful association clears the journal");
+                var chosen=Parse(transport.Calls.Last().Body); Require((string)chosen["association_token"]=="server-signed-choice","Choice transmitted only as opaque token");
+                chosen.Remove("association_token");Require(CrmQuickIntakeClient.Json().Serialize(chosen)==firstBody,"Quantity, condition, screenshot, specs, source and intake ID must be byte-equivalent");
+            }
+            transport=new FakeTransport(); root=Temp();
+            using(var client=new CrmQuickIntakeClient(transport,root))
+            {
+                Login(client);transport.AssociationResponse=new CrmHttpResponse {StatusCode=409,Body="{\"code\":\"product_association_required\",\"choices\":[]}"};
+                RequireThrows<CrmException>(()=>client.SubmitAsync(Submission(),CancellationToken.None).GetAwaiter().GetResult(),"Reject malformed association responses without modifying the journal");
+                Require(client.HasPending,"Malformed response never discards a possibly committed request");
+                Require(!client.CancelUncommittedAssociation(),"An untrusted reply cannot authorize deleting a receipt journal");
+            }
+        }
+
+        private static void TestOldBackendCannotCreateAnotherDraft()
+        {
+            foreach(string flag in new[]{"",",\"product_association_supported\":false",",\"product_association_supported\":\"true\""})
+            {
+                var transport=new FakeTransport(); string root=Temp();
+                transport.SessionResponse=new CrmHttpResponse {StatusCode=200,Body="{\"token\":\"valid-token\",\"token_type\":\"Bearer\",\"expires_in\":600"+flag+"}"};
+                using(var client=new CrmQuickIntakeClient(transport,root))
+                {
+                    Login(client);var error=RequireThrows<CrmException>(()=>client.SubmitAsync(Submission(),CancellationToken.None).GetAwaiter().GetResult(),"An old backend must never create a duplicate draft from the updated client");
+                    Require(error.StatusCode==426 && transport.Calls.Count==1 && !client.HasPending,"Only session metadata is requested; no stock or screenshot submission is sent");
+                }
+            }
         }
 
         private static void TestContract()
@@ -234,7 +292,8 @@ namespace PcPulseTests
         private sealed class FakeTransport : ICrmQuickTransport
         {
             public readonly List<Call> Calls = new List<Call>();
-            public CrmHttpResponse SessionResponse = new CrmHttpResponse { StatusCode = 200, Body = "{\"token\":\"MEMORY_TOKEN\",\"token_type\":\"Bearer\",\"expires_in\":600}" };
+            public CrmHttpResponse SessionResponse = new CrmHttpResponse { StatusCode = 200, Body = "{\"token\":\"MEMORY_TOKEN\",\"token_type\":\"Bearer\",\"expires_in\":600,\"product_association_supported\":true}" };
+            public CrmHttpResponse AssociationResponse;
             public int IntakeStatus = 201;
             public bool FailIntake, CancelIntake;
             public TaskCompletionSource<CrmHttpResponse> BlockIntake;
@@ -243,6 +302,7 @@ namespace PcPulseTests
             {
                 Calls.Add(new Call { Uri = uri, Body = body, Bearer = bearer, Key = key });
                 if (uri.AbsolutePath.EndsWith("/session")) { return Task.FromResult(SessionResponse); }
+                if (AssociationResponse != null) { return Task.FromResult(AssociationResponse); }
                 if (FailIntake) { throw new CrmException("Fixture lost reply"); }
                 if (CancelIntake)
                 {

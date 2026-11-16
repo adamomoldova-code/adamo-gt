@@ -17,6 +17,8 @@ namespace PcPulse
         private CrmQuickSubmission submission;
         private readonly TextBox quantity = new TextBox { Text = "1", MaxLength = 3, MinHeight = 36, Padding = new Thickness(8) };
         private readonly ComboBox condition = new ComboBox { MinHeight = 36, Padding = new Thickness(8, 5, 8, 5), SelectedIndex = -1 };
+        private readonly ComboBox association = new ComboBox { MaxDropDownHeight=260, MinHeight=36, Padding=new Thickness(8,5,8,5), SelectedIndex=-1 };
+        private FrameworkElement associationField;
         private readonly StackPanel selectionPanel = new StackPanel();
         private readonly TextBlock status = new TextBlock { TextWrapping = TextWrapping.Wrap, Margin = new Thickness(0, 6, 0, 8), MinHeight = 24, FontSize = 13 };
         private readonly Button primary = ActionButton("Continuă"), close = ActionButton("Anulează");
@@ -61,6 +63,10 @@ namespace PcPulse
             choices.Children.Add(Field("Cantitate", quantity));
             var conditionField = Field("Stare", condition); Grid.SetColumn(conditionField, 2); choices.Children.Add(conditionField);
             selectionPanel.Children.Add(choices);
+            associationField = Field("Produs existent sau produs nou", association);
+            associationField.Visibility = Visibility.Collapsed;
+            AutomationProperties.SetName(association, "Asociere produs CRM");
+            selectionPanel.Children.Add(associationField);
             condition.Items.Add(new ConditionChoice { Code = "new", Label = "Nou" });
             condition.Items.Add(new ConditionChoice { Code = "like_new", Label = "Ca nou" });
             condition.Items.Add(new ConditionChoice { Code = "used", Label = "Folosit" });
@@ -89,6 +95,8 @@ namespace PcPulse
             };
             Closing += delegate
             {
+                if (!busy && !completed && associationField.Visibility == Visibility.Visible)
+                { try { client.CancelUncommittedAssociation(); } catch { } }
                 closed = true; generation++;
                 if (cancellation != null) { cancellation.Cancel(); }
             };
@@ -114,6 +122,16 @@ namespace PcPulse
                 submission.Quantity = count; submission.Condition = chosen.Code;
             }
             attempted = true;
+            if (associationField.Visibility == Visibility.Visible)
+            {
+                var chosenItem = association.SelectedItem as ComboBoxItem;
+                var chosenProduct = chosenItem == null ? null : chosenItem.Tag as CrmQuickAssociationChoice;
+                if (chosenProduct == null || String.IsNullOrEmpty(chosenProduct.Token))
+                { status.Text = "Alege un produs compatibil sau «Creează produs nou»."; return; }
+                try { client.SelectAssociation(chosenProduct.Token); }
+                catch (Exception error) { status.Text = error.Message; return; }
+                associationField.Visibility = Visibility.Collapsed;
+            }
             int request = BeginOperation("Se trimite în CRM…");
             CancellationToken token = cancellation.Token;
             try
@@ -125,9 +143,22 @@ namespace PcPulse
                 if (result != null && result.Completed)
                 {
                     completed = true;
-                    status.Text = "Produs creat. Stickerele sunt în coada de imprimare.";
+                    status.Text = (result.ProductCreated ? "Produs creat." : "Unități asociate produsului existent.") + " Stickerele sunt în coada de imprimare.";
                 }
                 else { status.Text = "Trimiterea nu este completă. Încearcă din nou."; }
+            }
+            catch (CrmQuickAssociationException choice)
+            {
+                if (Current(request))
+                {
+                    association.Items.Clear();
+                    foreach (var option in choice.Choices) { association.Items.Add(new ComboBoxItem { Content=new TextBlock { Text=option.ToString(), TextWrapping=TextWrapping.Wrap, Width=240, MaxHeight=80, TextTrimming=TextTrimming.CharacterEllipsis },Tag=option,ToolTip=option.ToString(),IsEnabled=!String.IsNullOrEmpty(option.Token) }); }
+                    association.SelectedIndex = -1;
+                    associationField.Visibility = Visibility.Visible;
+                    Height = Math.Max(Height, 400);
+                    status.Text = "CRM a găsit produse asemănătoare. Confirmă asocierea; variantele cu diferențe nu pot fi alese.";
+                    association.Focus();
+                }
             }
             catch (OperationCanceledException) { if (Current(request)) { status.Text = "Trimiterea a fost întreruptă. Încearcă din nou."; } }
             catch (Exception error)
@@ -170,6 +201,7 @@ namespace PcPulse
         private void UpdateState()
         {
             selectionPanel.Visibility = Visibility.Visible;
+            association.IsEnabled = !busy && !completed;
             quantity.IsEnabled = condition.IsEnabled = !busy && !attempted && !completed;
             primary.Content = "Trimite și imprimă";
             primary.Visibility = completed ? Visibility.Collapsed : Visibility.Visible;
@@ -184,6 +216,7 @@ namespace PcPulse
             if (code == 403) { return "CRM este disponibil doar din oficiu."; }
             if (code == 409) { return "Verifică trimiterea în CRM."; }
             if (code == 404 || code == 503) { return "Conectarea CRM nu este încă disponibilă."; }
+            if (code == 426) { return "Versiunile ADAMO GT și CRM nu sunt compatibile. Actualizează integrarea."; }
             if (code == 429) { return "Prea multe încercări. Încearcă din nou mai târziu."; }
             return login ? "Conectarea nu a reușit. Încearcă din nou." : "Trimiterea nu a reușit. Încearcă din nou.";
         }

@@ -81,7 +81,7 @@ namespace PcPulseTests
                 {
                     var login = Json().Deserialize<Dictionary<string, object>>(body);
                     Require(login.Count == 1 && !login.ContainsKey("password") && login.ContainsKey("client_id") && bearer == null && key == null, "Office-only session has no password or staff username");
-                    return Task.FromResult(new CrmHttpResponse { StatusCode = 200, Body = "{\"token\":\"fixture-token\",\"token_type\":\"Bearer\",\"expires_in\":600}" });
+                    return Task.FromResult(new CrmHttpResponse { StatusCode = 200, Body = "{\"token\":\"fixture-token\",\"token_type\":\"Bearer\",\"expires_in\":600,\"product_association_supported\":true}" });
                 }
                 Require(uri.AbsolutePath == "/v1/adamo-gt/v2/product-intakes" && bearer == "fixture-token", "Scoped session is used for intake");
                 Body = body;

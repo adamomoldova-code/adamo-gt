@@ -21,7 +21,7 @@ namespace PcPulseTests
             SynchronizationContext.SetSynchronizationContext(new DispatcherSynchronizationContext(Dispatcher.CurrentDispatcher));
             try
             {
-                VerifyMinimalFlowAndRetry();
+                VerifyAssociationChoice(); VerifyMinimalFlowAndRetry();
                 VerifyPendingRestoreAndExpiredSession();
                 VerifyWrongPasswordAndClose();
                 VerifyClosedSubmit();
@@ -36,6 +36,27 @@ namespace PcPulseTests
                 }
             }
             finally { SynchronizationContext.SetSynchronizationContext(previous); }
+        }
+
+        private static void VerifyAssociationChoice()
+        {
+            using(var client = new FakeClient())
+            {
+                var window = new CrmQuickIntakeWindow(Prepared(),client);
+                Require(Field<FrameworkElement>(window,"associationField").Visibility == Visibility.Collapsed,"No extra choice on the initial quantity/condition form");
+                Field<ComboBox>(window,"condition").SelectedIndex=2;
+                client.SendError=new CrmQuickAssociationException(new List<CrmQuickAssociationChoice>{
+                    new CrmQuickAssociationChoice{Name="ID 1450 · CPU different",Reason="Procesor diferit",Token=""},
+                    new CrmQuickAssociationChoice{Name="ID 1670 · Compatible",Token="existing-token"},
+                    new CrmQuickAssociationChoice{Name="Creează produs nou",Token="new-token"}});
+                Drain(Continue(window));
+                var choice=Field<ComboBox>(window,"association");
+                Require(choice.Items.Count==3 && !((ComboBoxItem)choice.Items[0]).IsEnabled && choice.SelectedIndex==-1,"Incompatible variants are visibly disabled; no automatic manual choice");
+                Drain(Continue(window)); Require(client.SubmitCalls==1,"Confirmation is mandatory before retry");
+                choice.SelectedIndex=1; Drain(Continue(window));
+                Require(client.SubmitCalls==2 && client.ChosenAssociation=="existing-token" && Field<bool>(window,"completed"),"An explicit choice resumes the same receipt and reaches queued print");
+                window.Close();Pump();
+            }
         }
 
         private static void VerifyMinimalFlowAndRetry()
@@ -184,6 +205,7 @@ namespace PcPulseTests
         }
         private static void CollectLogical(DependencyObject root, List<Control> controls)
         {
+            var element = root as FrameworkElement; if (element != null && element.Visibility == Visibility.Collapsed) { return; }
             var control = root as Control; if (control != null) { controls.Add(control); }
             foreach (object child in LogicalTreeHelper.GetChildren(root))
             { var dependency = child as DependencyObject; if (dependency != null) { CollectLogical(dependency, controls); } }
@@ -200,6 +222,7 @@ namespace PcPulseTests
         }
         private sealed class FakeClient : CrmQuickIntakeClient
         {
+            internal string ChosenAssociation;
             internal int LoginCalls, SubmitCalls;
             internal bool Disposed, Partial, Authenticated;
             internal Exception LoginError, SendError;
@@ -225,6 +248,7 @@ namespace PcPulseTests
                 if (result.Completed) { Pending = null; }
                 return result;
             }
+            public override void SelectAssociation(string token) { ChosenAssociation=token; Pending.AssociationToken=token; SendError=null; }
             public override void Dispose() { Disposed = true; base.Dispose(); }
         }
         private static CrmQuickSubmission Prepared()
