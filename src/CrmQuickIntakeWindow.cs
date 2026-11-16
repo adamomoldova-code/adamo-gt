@@ -17,7 +17,8 @@ namespace PcPulse
         private CrmQuickSubmission submission;
         private readonly TextBox quantity = new TextBox { Text = "1", MaxLength = 3, MinHeight = 36, Padding = new Thickness(8) };
         private readonly ComboBox condition = new ComboBox { MinHeight = 36, Padding = new Thickness(8, 5, 8, 5), SelectedIndex = -1 };
-        private readonly ComboBox association = new ComboBox { MaxDropDownHeight=260, MinHeight=36, Padding=new Thickness(8,5,8,5), SelectedIndex=-1 };
+        private readonly ListBox association = new ListBox { MinHeight = 72, MaxHeight = 200, Padding = new Thickness(2), SelectedIndex = -1,
+            Background = Brushes.White, BorderBrush = Brush("#AEB8B2"), BorderThickness = new Thickness(1), HorizontalContentAlignment = HorizontalAlignment.Stretch };
         private FrameworkElement associationField;
         private readonly StackPanel selectionPanel = new StackPanel();
         private readonly TextBlock status = new TextBlock { TextWrapping = TextWrapping.Wrap, Margin = new Thickness(0, 6, 0, 8), MinHeight = 24, FontSize = 13 };
@@ -66,12 +67,17 @@ namespace PcPulse
             associationField = Field("Produs existent sau produs nou", association);
             associationField.Visibility = Visibility.Collapsed;
             AutomationProperties.SetName(association, "Asociere produs CRM");
-            selectionPanel.Children.Add(associationField);
+            ScrollViewer.SetHorizontalScrollBarVisibility(association, ScrollBarVisibility.Disabled);
+            ScrollViewer.SetVerticalScrollBarVisibility(association, ScrollBarVisibility.Auto);
+            association.SelectionChanged += delegate { UpdateState(); };
             condition.Items.Add(new ConditionChoice { Code = "new", Label = "Nou" });
             condition.Items.Add(new ConditionChoice { Code = "like_new", Label = "Ca nou" });
             condition.Items.Add(new ConditionChoice { Code = "used", Label = "Folosit" });
             var body = new Grid { VerticalAlignment = VerticalAlignment.Top };
+            body.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
+            body.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
             body.Children.Add(selectionPanel);
+            Grid.SetRow(associationField, 1); body.Children.Add(associationField);
             // Scrolling is only a fallback for unusually small work areas or large system text.
             var scroller = new ScrollViewer { Content = body, VerticalScrollBarVisibility = ScrollBarVisibility.Auto, HorizontalScrollBarVisibility = ScrollBarVisibility.Disabled };
             Grid.SetRow(scroller, 1); root.Children.Add(scroller);
@@ -124,7 +130,7 @@ namespace PcPulse
             attempted = true;
             if (associationField.Visibility == Visibility.Visible)
             {
-                var chosenItem = association.SelectedItem as ComboBoxItem;
+                var chosenItem = association.SelectedItem as ListBoxItem;
                 var chosenProduct = chosenItem == null ? null : chosenItem.Tag as CrmQuickAssociationChoice;
                 if (chosenProduct == null || String.IsNullOrEmpty(chosenProduct.Token))
                 { status.Text = "Alege un produs compatibil sau «Creează produs nou»."; return; }
@@ -152,12 +158,30 @@ namespace PcPulse
                 if (Current(request))
                 {
                     association.Items.Clear();
-                    foreach (var option in choice.Choices) { association.Items.Add(new ComboBoxItem { Content=new TextBlock { Text=option.ToString(), TextWrapping=TextWrapping.Wrap, Width=240, MaxHeight=80, TextTrimming=TextTrimming.CharacterEllipsis },Tag=option,ToolTip=option.ToString(),IsEnabled=!String.IsNullOrEmpty(option.Token) }); }
+                    foreach (var option in choice.Choices)
+                    {
+                        bool eligible = !String.IsNullOrEmpty(option.Token);
+                        var text = new StackPanel();
+                        text.Children.Add(new TextBlock { Text = option.Name, TextWrapping = TextWrapping.Wrap, MaxHeight = 48,
+                            TextTrimming = TextTrimming.CharacterEllipsis, Foreground = eligible ? Foreground : Brush("#59615D") });
+                        if (!String.IsNullOrEmpty(option.Reason))
+                        { text.Children.Add(new TextBlock { Text = option.Reason, FontSize = 12, TextWrapping = TextWrapping.Wrap, Foreground = Brush("#59615D"), Margin = new Thickness(0, 2, 0, 0) }); }
+                        association.Items.Add(new ListBoxItem {
+                            Content = text,
+                            Tag = option, ToolTip = option.ToString(), IsEnabled = eligible,
+                            Padding = new Thickness(8, 6, 8, 6), HorizontalContentAlignment = HorizontalAlignment.Stretch
+                        });
+                    }
                     association.SelectedIndex = -1;
                     associationField.Visibility = Visibility.Visible;
-                    Height = Math.Max(Height, 400);
+                    Height = Math.Max(Height, 520);
                     status.Text = "CRM a găsit produse asemănătoare. Confirmă asocierea; variantele cu diferențe nu pot fi alese.";
-                    association.Focus();
+                    if (IsLoaded) { DialogViewport.Fit(this, DialogViewport.WorkArea(Owner)); }
+                    associationField.InvalidateMeasure(); associationField.InvalidateArrange();
+                    Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.Loaded, new Action(delegate {
+                        if (closed || completed || associationField.Visibility != Visibility.Visible) { return; }
+                        associationField.UpdateLayout(); associationField.BringIntoView(); association.Focus();
+                    }));
                 }
             }
             catch (OperationCanceledException) { if (Current(request)) { status.Text = "Trimiterea a fost întreruptă. Încearcă din nou."; } }
@@ -205,7 +229,10 @@ namespace PcPulse
             quantity.IsEnabled = condition.IsEnabled = !busy && !attempted && !completed;
             primary.Content = "Trimite și imprimă";
             primary.Visibility = completed ? Visibility.Collapsed : Visibility.Visible;
-            primary.IsEnabled = !busy && !closed && !completed;
+            var chosenItem = association.SelectedItem as ListBoxItem;
+            var chosen = chosenItem == null ? null : chosenItem.Tag as CrmQuickAssociationChoice;
+            primary.IsEnabled = !busy && !closed && !completed && (associationField.Visibility != Visibility.Visible
+                || (chosenItem != null && chosenItem.IsEnabled && chosen != null && !String.IsNullOrEmpty(chosen.Token)));
             close.Content = completed ? "Închide" : "Anulează";
         }
         private static string ErrorText(Exception error, bool login)

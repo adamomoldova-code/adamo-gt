@@ -6,6 +6,10 @@ ADAMO GT displays CPU, RAM, GPU, storage, battery, display and model information
 
 Project and downloads: [ADAMO.MD](https://adamo.md/ro/blog/adamo-gt-verificare-laptop-pc).
 
+## Version 2.7.12
+
+CRM product choices appear in an inline list after the server requests confirmation. Compatible products and the create-new alternative are visible without opening a dropdown; incompatible rows show their reason. The dialog updates its layout after the response, supports narrow windows, and enables sending only after an eligible choice. Receipt data and retry identifiers remain frozen.
+
 ## Version 2.7.11
 
 CRM association support: a server-confirmed hardware configuration can receive new units under an existing product. When the CRM requires review, the quantity/condition dialog shows only server-issued product choices, disables known incompatible configurations, and requires explicit confirmation. The frozen screenshot, quantity, condition and intake identifier survive retries and restarts; a choice cannot be changed after a potentially committed request. Existing published products are accepted without claiming a new product was created. This requires the matching CRM backend update. Before sending receipt data, the client requires the server to explicitly confirm association support; an older backend is rejected without submitting stock or the screenshot. Existing units and historical receipts are not moved or merged automatically.
