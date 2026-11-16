@@ -21,7 +21,7 @@ namespace PcPulseTests
             SynchronizationContext.SetSynchronizationContext(new DispatcherSynchronizationContext(Dispatcher.CurrentDispatcher));
             try
             {
-                VerifyAssociationChoice(); VerifyMinimalFlowAndRetry();
+                VerifyAssociationChoice(); VerifyAssociationListLayouts(); VerifyMinimalFlowAndRetry();
                 VerifyPendingRestoreAndExpiredSession();
                 VerifyWrongPasswordAndClose();
                 VerifyClosedSubmit();
@@ -43,19 +43,73 @@ namespace PcPulseTests
             using(var client = new FakeClient())
             {
                 var window = new CrmQuickIntakeWindow(Prepared(),client);
+                var content = (FrameworkElement)window.Content; window.Content = null;
+                var host = new Border { Child = content, Width = 420, Height = 260, Background = window.Background };
+                host.Measure(new Size(420, 260)); host.Arrange(new Rect(0, 0, 420, 260)); host.UpdateLayout();
                 Require(Field<FrameworkElement>(window,"associationField").Visibility == Visibility.Collapsed,"No extra choice on the initial quantity/condition form");
                 Field<ComboBox>(window,"condition").SelectedIndex=2;
-                client.SendError=new CrmQuickAssociationException(new List<CrmQuickAssociationChoice>{
+                client.SendGate = new TaskCompletionSource<CrmQuickIntakeResult>();
+                Task send = Continue(window);
+                host.UpdateLayout();
+                client.SendGate.SetException(new CrmQuickAssociationException(new List<CrmQuickAssociationChoice>{
                     new CrmQuickAssociationChoice{Name="ID 1450 · CPU different",Reason="Procesor diferit",Token=""},
                     new CrmQuickAssociationChoice{Name="ID 1670 · Compatible",Token="existing-token"},
-                    new CrmQuickAssociationChoice{Name="Creează produs nou",Token="new-token"}});
-                Drain(Continue(window));
-                var choice=Field<ComboBox>(window,"association");
-                Require(choice.Items.Count==3 && !((ComboBoxItem)choice.Items[0]).IsEnabled && choice.SelectedIndex==-1,"Incompatible variants are visibly disabled; no automatic manual choice");
+                    new CrmQuickAssociationChoice{Name="Creează produs nou",Token="new-token"}}));
+                Drain(send); client.SendGate = null;
+                host.Height = 480; host.Measure(new Size(420, 480)); host.Arrange(new Rect(0, 0, 420, 480)); host.UpdateLayout(); Pump();
+                var choice=Field<ListBox>(window,"association");
+                Require(Field<FrameworkElement>(window,"associationField").ActualHeight > 40 && choice.ActualHeight >= 30,
+                    "The association label and selector must occupy visible space after an initially collapsed layout");
+                Require(choice.Items.Count==3 && !((ListBoxItem)choice.Items[0]).IsEnabled && choice.SelectedIndex==-1,"Incompatible variants are visibly disabled; no automatic manual choice");
+                Require(!Field<Button>(window,"primary").IsEnabled,"Send is unavailable until an eligible product is explicitly selected");
                 Drain(Continue(window)); Require(client.SubmitCalls==1,"Confirmation is mandatory before retry");
-                choice.SelectedIndex=1; Drain(Continue(window));
+                choice.SelectedIndex=1;
+                Require(Field<Button>(window,"primary").IsEnabled,"Selecting a compatible product enables confirmation");
+                Drain(Continue(window));
                 Require(client.SubmitCalls==2 && client.ChosenAssociation=="existing-token" && Field<bool>(window,"completed"),"An explicit choice resumes the same receipt and reaches queued print");
                 window.Close();Pump();
+            }
+        }
+
+        private static void VerifyAssociationListLayouts()
+        {
+            string artifacts = Path.GetFullPath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "..", "artifacts", "crm-association-visible"));
+            Directory.CreateDirectory(artifacts);
+            foreach (Size size in new[] { new Size(304, 440), new Size(420, 480), new Size(600, 560) })
+            {
+                using (var client = new FakeClient())
+                {
+                    var window = new CrmQuickIntakeWindow(Prepared(), client);
+                    var content = (FrameworkElement)window.Content; window.Content = null;
+                    var host = new Border { Child = content, Width = size.Width, Height = size.Height, Background = window.Background };
+                    System.Windows.Documents.TextElement.SetFontFamily(host, window.FontFamily);
+                    System.Windows.Documents.TextElement.SetFontSize(host, window.FontSize);
+                    System.Windows.Documents.TextElement.SetForeground(host, window.Foreground);
+                    host.Measure(size); host.Arrange(new Rect(new Point(), size)); host.UpdateLayout();
+                    Field<ComboBox>(window,"condition").SelectedIndex=2;
+                    client.SendError = new CrmQuickAssociationException(new List<CrmQuickAssociationChoice> {
+                        new CrmQuickAssociationChoice { Name="ID 1450 · Panasonic CF-C2 / i5-4310U / 16GB RAM / 512GB SSD", Reason="Procesor diferit" },
+                        new CrmQuickAssociationChoice { Name="ID 1670 · Panasonic CF-C2 / i5-4300U / 16GB RAM / 500GB SSD", Token="existing" },
+                        new CrmQuickAssociationChoice { Name="Creează produs nou", Token="new" }
+                    });
+                    Drain(Continue(window)); host.Measure(size); host.Arrange(new Rect(new Point(), size)); host.UpdateLayout(); Pump();
+                    var list = Field<ListBox>(window,"association");
+                    Rect bounds = list.TransformToAncestor(host).TransformBounds(new Rect(list.RenderSize));
+                    Require(bounds.Width > 200 && bounds.Height >= 72 && bounds.Top >= 0 && bounds.Bottom <= size.Height,
+                        "Inline CRM choices occupy a visible region at " + size);
+                    var product = (ListBoxItem)list.Items[1];
+                    list.ScrollIntoView(product); host.UpdateLayout(); Pump();
+                    Require(product.ActualHeight > 20 && product.IsEnabled && FindVisual<TextBlock>(product).Text.Contains("1670"),
+                        "A compatible product has a rendered selectable row at " + size);
+                    var image = new RenderTargetBitmap((int)size.Width,(int)size.Height,96,96,PixelFormats.Pbgra32); image.Render(host);
+                    var encoder = new PngBitmapEncoder(); encoder.Frames.Add(BitmapFrame.Create(image));
+                    using (var stream = File.Create(Path.Combine(artifacts,"choices-"+size.Width+"x"+size.Height+".png"))) { encoder.Save(stream); }
+                    list.SelectedIndex=2;
+                    Require(Field<Button>(window,"primary").IsEnabled,"Create-new remains an explicit selectable alternative");
+                    Drain(Continue(window));
+                    Require(client.ChosenAssociation=="new" && client.SubmitCalls==2,"Create-new uses the offered choice without another duplicate send");
+                    window.Close(); Pump();
+                }
             }
         }
 

@@ -36,8 +36,8 @@
   },
   {
     "Path": "README.md",
-    "Length": 12837,
-    "Sha256": "66f39367cd1a2051c865a5fbff66bd12549f1313b440b55b69bd98eba201155b"
+    "Length": 13246,
+    "Sha256": "a727e77ca742c4e70ff33198d5c5f3779c5a0fa02a5361135711ee96c2648168"
   },
   {
     "Path": "SINGLE-FILE.md",
@@ -186,8 +186,8 @@
   },
   {
     "Path": "src/CrmQuickIntakeWindow.cs",
-    "Length": 13949,
-    "Sha256": "b0fadf3b0558a2ee64d763ef08a24f955846d92da58c3b4b3c0e3cdbbb443678"
+    "Length": 16206,
+    "Sha256": "8baeef7dc594215c3c65eca7a18fcb77ba6001398b0c0e54f3d2fa0d330be00e"
   },
   {
     "Path": "src/CrmQuickPayload.cs",
@@ -322,7 +322,7 @@
   {
     "Path": "src/Program.cs",
     "Length": 65475,
-    "Sha256": "70a8b220a6f30190af6b47d8823bc75a7f987ebb692f67d7c1c2673fca1ce33c"
+    "Sha256": "a4d986dd907517b20f1b684f404ed8a818a8a224711e0f59b3653da4520b1402"
   },
   {
     "Path": "src/ScreenInventory.cs",
@@ -481,8 +481,8 @@
   },
   {
     "Path": "tests/CrmQuickIntakeWindowTests.cs",
-    "Length": 19396,
-    "Sha256": "507439cd089bcc2495fe59cf74cb10d9aeaf090e6c1194db55484ee021536338"
+    "Length": 24083,
+    "Sha256": "b37cc27d8ea61e7258d32f2a8a1fd39da0ff92fd79eda369d498a49f780f411c"
   },
   {
     "Path": "tests/CrmQuickPayloadTests.cs",
