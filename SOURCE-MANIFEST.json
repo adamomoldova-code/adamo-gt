@@ -36,8 +36,8 @@
   },
   {
     "Path": "README.md",
-    "Length": 11972,
-    "Sha256": "66f02c438377c8781a9c1e410f4ac31a81d2bc99b2b55de367dae9adef2fb552"
+    "Length": 12837,
+    "Sha256": "66f39367cd1a2051c865a5fbff66bd12549f1313b440b55b69bd98eba201155b"
   },
   {
     "Path": "SINGLE-FILE.md",
@@ -181,13 +181,13 @@
   },
   {
     "Path": "src/CrmQuickIntakeClient.cs",
-    "Length": 24533,
-    "Sha256": "c6a24414330d1ecda88ae2da9f3418dc6598068a0707ee37b8e93394683f1fd5"
+    "Length": 29333,
+    "Sha256": "0a3ab5d6573930116fe847371fa0681b12ef6b625124ba46959bf37dd3b782e6"
   },
   {
     "Path": "src/CrmQuickIntakeWindow.cs",
-    "Length": 11452,
-    "Sha256": "8fd05d0875590158e3ccb106cc00952fe5f932be48d9a3af3bb12a1e925248e0"
+    "Length": 13949,
+    "Sha256": "b0fadf3b0558a2ee64d763ef08a24f955846d92da58c3b4b3c0e3cdbbb443678"
   },
   {
     "Path": "src/CrmQuickPayload.cs",
@@ -322,7 +322,7 @@
   {
     "Path": "src/Program.cs",
     "Length": 65475,
-    "Sha256": "8e632dd90b3b98e4f9d829d3a65601374a9a270409829cbd4a444c1e0d8e8775"
+    "Sha256": "70a8b220a6f30190af6b47d8823bc75a7f987ebb692f67d7c1c2673fca1ce33c"
   },
   {
     "Path": "src/ScreenInventory.cs",
@@ -471,18 +471,18 @@
   },
   {
     "Path": "tests/CrmQuickFlowTests.cs",
-    "Length": 8563,
-    "Sha256": "c62d22ff32fedc1e0f81bba7b17ef8a8acbe76c35c26cf2cb2a7a833b276d349"
+    "Length": 8602,
+    "Sha256": "ba81ffc09152a40bf94e438e90e0dd3d32fabc8617b7d8cc56b37f5399dfb198"
   },
   {
     "Path": "tests/CrmQuickIntakeClientTests.cs",
-    "Length": 20610,
-    "Sha256": "6a49314db02941cbb5b114b857b7c402f6dc3991a828ea428c06df89a2c1287a"
+    "Length": 26158,
+    "Sha256": "43bca609e6c32a825a1d9ec2491003a1a061304a9529ba85631b01b69bbdaf8c"
   },
   {
     "Path": "tests/CrmQuickIntakeWindowTests.cs",
-    "Length": 17440,
-    "Sha256": "6f47a4cf9eca3b4999382b5a6eddb750928dabb60e48eb4f431c91bc50f08a69"
+    "Length": 19396,
+    "Sha256": "507439cd089bcc2495fe59cf74cb10d9aeaf090e6c1194db55484ee021536338"
   },
   {
     "Path": "tests/CrmQuickPayloadTests.cs",
