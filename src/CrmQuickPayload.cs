@@ -21,8 +21,8 @@ namespace PcPulse
                 { "schema_version", 1 },
                 { "computer", new Dictionary<string, object>
                     {
-                        { "manufacturer", Known(snapshot.ComputerManufacturer) },
-                        { "model", Known(snapshot.ComputerModel) },
+                        { "manufacturer", Known(ProductSpecificationText.Manufacturer(snapshot.ComputerManufacturer)) },
+                        { "model", Known(ProductSpecificationText.Model(snapshot)) },
                         { "sku", Known(snapshot.ComputerSku) },
                         // OS edition only; ComputerName is deliberately excluded.
                         { "windows_name", Known(snapshot.WindowsName) }
@@ -30,7 +30,7 @@ namespace PcPulse
                 },
                 { "cpu", new Dictionary<string, object>
                     {
-                        { "name", Known(snapshot.CpuName) },
+                        { "name", Known(ProductSpecificationText.Cpu(snapshot.CpuName)) },
                         { "cores", PositiveInteger(snapshot.CpuCores) },
                         { "threads", PositiveInteger(snapshot.CpuThreads) },
                         { "max_clock_mhz", Positive(snapshot.CpuMaxClockMhz) },
@@ -43,7 +43,7 @@ namespace PcPulse
                     {
                         // Available OS memory is not a fallback for installed RAM.
                         { "installed_bytes", Capacity(snapshot.RamInstalledBytes) },
-                        { "type", Known(snapshot.RamType) },
+                        { "type", Known(ProductSpecificationText.RamType(snapshot.RamType)) },
                         { "rate", Known(snapshot.RamRate) },
                         { "clock_mhz", Positive(snapshot.RamClockMhz) },
                         { "module_count", NonnegativeInteger(snapshot.RamModuleCount) },
@@ -87,7 +87,7 @@ namespace PcPulse
             {
                 result.Add(new Dictionary<string, object>
                 {
-                    { "name", gpu.UsesBasicDisplayDriver && !gpu.PciNameResolved ? null : Known(gpu.Name) },
+                    { "name", gpu.UsesBasicDisplayDriver && !gpu.PciNameResolved ? null : Known(ProductSpecificationText.Gpu(gpu.Name)) },
                     { "is_integrated", gpu.IsIntegrated },
                     { "memory_bytes", ExactUnsigned(gpu.MemoryBytes) },
                     { "shared_memory_bytes", ExactUnsigned(gpu.SharedMemoryBytes) }

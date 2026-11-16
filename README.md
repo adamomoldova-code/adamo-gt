@@ -6,6 +6,10 @@ ADAMO GT displays CPU, RAM, GPU, storage, battery, display and model information
 
 Project and downloads: [ADAMO.MD](https://adamo.md/ro/blog/adamo-gt-verificare-laptop-pc).
 
+## Version 2.7.10
+
+System RAM inventory now excludes ROM/Flash entries and devices unambiguously assigned by Windows to video, flash, nonvolatile or cache memory arrays. Capacity is not blindly rounded; unknown ownership is retained. The same filtered modules drive installed capacity, slot counts, type and speed. CRM specifications use compact manufacturer and CPU/GPU descriptions, preserve the full configuration SKU separately, and omit unknown fragments from mixed RAM-type strings. Panasonic CF/FZ family labels are shortened only when the firmware model equals the configuration SKU. Existing CRM products and printed jobs are not modified automatically. This version remains unsigned.
+
 ## Version 2.7.9
 
 Internal SSDs exposed through Intel RST/RAID reach the CRM product specifications when a physical-device NVMe SMART response or smartctl ATA nonrotating-media report confirms the medium. Unknown arrays and external/virtual transports remain excluded. This fixes the missing 250 GB SSD in the Latitude 7280 intake case; existing CRM records and printed labels are not automatically edited or duplicated.

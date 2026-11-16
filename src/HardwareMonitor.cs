@@ -313,7 +313,14 @@ namespace PcPulse
 
         private void ReadMemoryInventory()
         {
-            List<Dictionary<string, object>> modules = Query("root\\cimv2", "SELECT Capacity, ConfiguredClockSpeed, DeviceLocator, SMBIOSMemoryType, FormFactor FROM Win32_PhysicalMemory");
+            List<Dictionary<string, object>> modules = Query("root\\cimv2", "SELECT Tag, Capacity, ConfiguredClockSpeed, DeviceLocator, MemoryType, SMBIOSMemoryType, FormFactor FROM Win32_PhysicalMemory");
+            List<Dictionary<string, object>> arrays = null, locations = null;
+            try { arrays = Query("root\\cimv2", "SELECT Tag, Use FROM Win32_PhysicalMemoryArray"); } catch { }
+            try { locations = Query("root\\cimv2", "SELECT GroupComponent, PartComponent FROM Win32_PhysicalMemoryLocation"); } catch { }
+            var systemModules = MemoryModuleInventory.SystemModules(modules, arrays, locations);
+            if (systemModules.Count < modules.Count)
+            { inventory.Issues.Add("Из состава RAM исключены записи BIOS о ROM/Flash, видеопамяти или кэше: " + (modules.Count - systemModules.Count) + "."); }
+            modules = systemModules;
             memoryModules = modules;
             HardwareDetailsInventory.ApplyInstalledMemory(inventory, modules);
             ApplyMemorySlots(inventory, modules, null);
@@ -326,7 +333,7 @@ namespace PcPulse
                 ulong rate = Unsigned(module, "ConfiguredClockSpeed") ?? 0;
                 if (rate > 0) { rates.Add(rate.ToString(CultureInfo.InvariantCulture)); }
                 string memoryType = MemoryType((int)(Unsigned(module, "SMBIOSMemoryType") ?? 0));
-                memoryTypes.Add(memoryType.Length > 0 ? memoryType : "Не определён");
+                if (memoryType.Length > 0) { memoryTypes.Add(memoryType); }
                 configurations.Add((capacity / 1073741824d).ToString("0.#", CultureInfo.GetCultureInfo("ru-RU")) + " GB" + (memoryType.Length > 0 ? " " + memoryType : ""));
             }
             inventory.RamTotalBytes = inventory.RamInstalledBytes;
