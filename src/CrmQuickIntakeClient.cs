@@ -43,6 +43,7 @@ namespace PcPulse
         public string IntakeId { get; set; }
         public string ImageStatus { get; set; }
         public string PrintStatus { get; set; }
+        public bool? PrinterOnline { get; set; }
         public bool Completed { get; set; }
     }
 
@@ -82,7 +83,8 @@ namespace PcPulse
                         token.ThrowIfCancellationRequested();
                         var response = error.Response as HttpWebResponse;
                         if (response != null) { using (response) { return Read(response); } }
-                        throw new CrmException("CRM не ответил. Повторите сохранённую отправку.");
+                        throw new CrmException("CRM не ответил. Повторите сохранённую отправку.", 0,
+                            error.Status == WebExceptionStatus.Timeout ? "timeout" : "connection_failed");
                     }
                 }
             }, token);
@@ -301,7 +303,9 @@ namespace PcPulse
                 && Guid.TryParse(Text(print, "job_id"), out jobId) && jobId != Guid.Empty
                 && Int32.TryParse(Text(print, "total_labels"), out count) && count == pending.Quantity;
             return new CrmQuickIntakeResult { ProductCreated = BooleanIs(product, "created", true), ProductId = productId.ToString(CultureInfo.InvariantCulture), IntakeId = intakeId.ToString(CultureInfo.InvariantCulture),
-                ImageStatus = imageStatus, PrintStatus = printStatus, Completed = imageConfirmed && printConfirmed };
+                ImageStatus = imageStatus, PrintStatus = printStatus,
+                PrinterOnline = BooleanIs(print, "printer_online", true) ? (bool?)true : (BooleanIs(print, "printer_online", false) ? (bool?)false : null),
+                Completed = imageConfirmed && printConfirmed };
         }
 
         private async Task<CrmHttpResponse> Request(string path, string body, string accessToken, string key, CancellationToken token)
@@ -314,7 +318,7 @@ namespace PcPulse
                 catch (OperationCanceledException)
                 {
                     token.ThrowIfCancellationRequested();
-                    throw new CrmException("CRM не ответил вовремя. Повторите сохранённую отправку.");
+                    throw new CrmException("CRM не ответил вовремя. Повторите сохранённую отправку.", 0, "timeout");
                 }
                 if (response != null && (response.StatusCode == 200 || response.StatusCode == 201)) { return response; }
                 int status = response == null ? 0 : response.StatusCode;
@@ -350,7 +354,20 @@ namespace PcPulse
                     case 422: message = "CRM не принял данные. Отправка сохранена; проверьте состояние и количество."; break;
                     case 429: message = "Слишком много попыток. Подождите и повторите."; break;
                 }
-                throw new CrmException(message, status);
+                string failureReason = null;
+                if (status == 409 && response != null)
+                {
+                    var rejection = Parse(response.Body);
+                    if (Text(rejection, "code") == "receipt_identity_collision") { failureReason = "receipt_identity_collision"; }
+                }
+                if (status == 422 && response != null)
+                {
+                    var errors = Object(Parse(response.Body), "errors");
+                    if (errors.ContainsKey("association_token")) { failureReason = "association_invalid"; }
+                    else if (errors.ContainsKey("screenshot.base64") || errors.ContainsKey("screenshot")) { failureReason = "screenshot_invalid"; }
+                    else if (errors.ContainsKey("detected_specs")) { failureReason = "specifications_invalid"; }
+                }
+                throw new CrmException(message, status, failureReason);
             }
         }
 

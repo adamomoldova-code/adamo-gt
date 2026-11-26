@@ -6,6 +6,10 @@ ADAMO GT displays CPU, RAM, GPU, storage, battery, display and model information
 
 Project and downloads: [ADAMO.MD](https://adamo.md/ro/blog/adamo-gt-verificare-laptop-pc).
 
+## Version 2.7.13
+
+CRM errors distinguish connection failures, invalid data and receipt-number conflicts while preserving the frozen submission. Print results distinguish queued, processing, completed, paused, failed and cancelled jobs and identify an offline office Print Bridge when reported by the server. A saved product is identified separately from an incomplete screenshot or printing step. The paired CRM update automatically retries only rolled-back collisions with historical receipt numbers and returns the current job status; it does not create duplicate receipts or print jobs.
+
 ## Version 2.7.12
 
 CRM product choices appear in an inline list after the server requests confirmation. Compatible products and the create-new alternative are visible without opening a dropdown; incompatible rows show their reason. The dialog updates its layout after the response, supports narrow windows, and enables sending only after an eligible choice. Receipt data and retry identifiers remain frozen.

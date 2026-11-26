@@ -56,7 +56,8 @@ namespace PcPulse
     public sealed class CrmException : Exception
     {
         public int StatusCode { get; private set; }
-        public CrmException(string message, int statusCode = 0) : base(message) { StatusCode = statusCode; }
+        public string ReasonCode { get; private set; }
+        public CrmException(string message, int statusCode = 0, string reasonCode = null) : base(message) { StatusCode = statusCode; ReasonCode = reasonCode; }
     }
     internal sealed class CrmHttpResponse
     {
