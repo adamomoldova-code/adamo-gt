@@ -36,8 +36,8 @@
   },
   {
     "Path": "README.md",
-    "Length": 13246,
-    "Sha256": "a727e77ca742c4e70ff33198d5c5f3779c5a0fa02a5361135711ee96c2648168"
+    "Length": 13838,
+    "Sha256": "aaea5e732905394dcd49eb4bce1801cc1b67359918e3fa1a9f882f92bea2fc21"
   },
   {
     "Path": "SINGLE-FILE.md",
@@ -156,8 +156,8 @@
   },
   {
     "Path": "src/CrmIntakeClient.cs",
-    "Length": 26554,
-    "Sha256": "4a5c93d15eb4d80a380acbde1ba9eab40dacaca1c31a3d2d63a7da9b4c5e9e6b"
+    "Length": 26660,
+    "Sha256": "389bf6bde3fa969ff508d3ca422977d8eebc626b32936b6d93fdea0fa2016372"
   },
   {
     "Path": "src/CrmIntakeWindow.cs",
@@ -181,13 +181,13 @@
   },
   {
     "Path": "src/CrmQuickIntakeClient.cs",
-    "Length": 29333,
-    "Sha256": "0a3ab5d6573930116fe847371fa0681b12ef6b625124ba46959bf37dd3b782e6"
+    "Length": 30550,
+    "Sha256": "a5d5d758492e33b5a774be1d9344dd8351948bbf4d044fed195cc77b29a39176"
   },
   {
     "Path": "src/CrmQuickIntakeWindow.cs",
-    "Length": 16206,
-    "Sha256": "8baeef7dc594215c3c65eca7a18fcb77ba6001398b0c0e54f3d2fa0d330be00e"
+    "Length": 18746,
+    "Sha256": "a32b1ac163bbaebbaa63a14b2bdd013b9678941d7e6fd09abee4c70ba7b679b6"
   },
   {
     "Path": "src/CrmQuickPayload.cs",
@@ -322,7 +322,7 @@
   {
     "Path": "src/Program.cs",
     "Length": 65475,
-    "Sha256": "a4d986dd907517b20f1b684f404ed8a818a8a224711e0f59b3653da4520b1402"
+    "Sha256": "2a2e536776d3dbddc83433eb67e4ed5439dac9490cbf6b2e50c149acf6005142"
   },
   {
     "Path": "src/ScreenInventory.cs",
@@ -476,13 +476,13 @@
   },
   {
     "Path": "tests/CrmQuickIntakeClientTests.cs",
-    "Length": 26158,
-    "Sha256": "43bca609e6c32a825a1d9ec2491003a1a061304a9529ba85631b01b69bbdaf8c"
+    "Length": 28635,
+    "Sha256": "433594f95928c432bf34ad9d422ecdbe1730955d662f271940080554d7157bf3"
   },
   {
     "Path": "tests/CrmQuickIntakeWindowTests.cs",
-    "Length": 24083,
-    "Sha256": "b37cc27d8ea61e7258d32f2a8a1fd39da0ff92fd79eda369d498a49f780f411c"
+    "Length": 25771,
+    "Sha256": "87f2c99301aa2c5ab8ac64592eea9f46c5858be32337ee22b92c0fcf492e4c2f"
   },
   {
     "Path": "tests/CrmQuickPayloadTests.cs",

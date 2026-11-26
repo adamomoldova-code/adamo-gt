@@ -149,7 +149,12 @@ namespace PcPulse
                 if (result != null && result.Completed)
                 {
                     completed = true;
-                    status.Text = (result.ProductCreated ? "Produs creat." : "Unități asociate produsului existent.") + " Stickerele sunt în coada de imprimare.";
+                    status.Text = (result.ProductCreated ? "Produs creat." : "Unități asociate produsului existent.") + " " + PrintText(result);
+                }
+                else if (result != null && !String.IsNullOrEmpty(result.ProductId))
+                {
+                    status.Text = "Produsul este salvat în CRM. " + (result.ImageStatus != "attached"
+                        ? "Captura nu s-a atașat; încearcă din nou pentru a o recupera fără dublare. " : "") + PrintText(result);
                 }
                 else { status.Text = "Trimiterea nu este completă. Încearcă din nou."; }
             }
@@ -239,13 +244,33 @@ namespace PcPulse
         {
             var crm = error as CrmException;
             int code = crm == null ? 0 : crm.StatusCode;
+            string reason = crm == null ? null : crm.ReasonCode;
+            if (reason == "timeout" || reason == "connection_failed") { return "CRM nu a răspuns. Reia aceeași trimitere; produsul și stickerele nu se dublează."; }
+            if (reason == "receipt_identity_collision") { return "CRM nu a putut aloca numărul recepției. Reia trimiterea salvată; nu crea altă recepție."; }
+            if (reason == "association_invalid") { return "Asocierea produsului nu a fost acceptată de CRM. Trimiterea a fost păstrată."; }
+            if (reason == "screenshot_invalid") { return "CRM nu a acceptat captura primei pagini. Trimiterea a fost păstrată."; }
+            if (reason == "specifications_invalid") { return "CRM nu a acceptat specificațiile. Trimiterea a fost păstrată."; }
             if (code == 401) { return "Sesiunea a expirat. Încearcă din nou."; }
             if (code == 403) { return "CRM este disponibil doar din oficiu."; }
-            if (code == 409) { return "Verifică trimiterea în CRM."; }
+            if (code == 409) { return "CRM a detectat un conflict cu recepția salvată. Datele sunt păstrate; nu crea un produs nou pentru aceeași trimitere."; }
+            if (code == 413) { return "Captura depășește limita acceptată de server. Trimiterea a fost păstrată."; }
+            if (code == 422) { return "CRM nu a acceptat datele. Trimiterea a fost păstrată pentru verificare."; }
             if (code == 404 || code == 503) { return "Conectarea CRM nu este încă disponibilă."; }
             if (code == 426) { return "Versiunile ADAMO GT și CRM nu sunt compatibile. Actualizează integrarea."; }
             if (code == 429) { return "Prea multe încercări. Încearcă din nou mai târziu."; }
             return login ? "Conectarea nu a reușit. Încearcă din nou." : "Trimiterea nu a reușit. Încearcă din nou.";
+        }
+        private static string PrintText(CrmQuickIntakeResult result)
+        {
+            if (result.PrintStatus == "completed") { return "Print Bridge a confirmat imprimarea stickerelor."; }
+            if (result.PrintStatus == "processing") { return "Print Bridge procesează stickerele."; }
+            if (result.PrintStatus == "queued") { return result.PrinterOnline == false
+                ? "Stickerele așteaptă în coadă: Print Bridge din oficiu este offline."
+                : "Stickerele sunt în coada de imprimare."; }
+            if (result.PrintStatus == "paused") { return "Imprimarea este suspendată în Print Bridge. Reia jobul existent din CRM, apoi verifică din nou."; }
+            if (result.PrintStatus == "failed") { return "Print Bridge a raportat o eroare. Verifică imprimanta și jobul existent din CRM."; }
+            if (result.PrintStatus == "cancelled") { return "Jobul de imprimare a fost anulat în CRM."; }
+            return "CRM nu a confirmat jobul de imprimare. Reia aceeași trimitere pentru verificare.";
         }
         private static FrameworkElement Field(string label, Control control)
         {

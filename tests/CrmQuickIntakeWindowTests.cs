@@ -17,6 +17,7 @@ namespace PcPulseTests
     {
         public static void Run()
         {
+            VerifyPrintResultMessages();
             SynchronizationContext previous = SynchronizationContext.Current;
             SynchronizationContext.SetSynchronizationContext(new DispatcherSynchronizationContext(Dispatcher.CurrentDispatcher));
             try
@@ -36,6 +37,28 @@ namespace PcPulseTests
                 }
             }
             finally { SynchronizationContext.SetSynchronizationContext(previous); }
+        }
+
+        private static void VerifyPrintResultMessages()
+        {
+            foreach (string state in new[] { "queued", "processing", "completed", "paused", "failed", "cancelled", "missing" })
+            using (var client = new FakeClient())
+            {
+                var window = new CrmQuickIntakeWindow(Prepared(), client);
+                Field<ComboBox>(window, "condition").SelectedIndex = 2;
+                client.SendGate = new TaskCompletionSource<CrmQuickIntakeResult>();
+                Task send = Continue(window);
+                client.SendGate.SetResult(new CrmQuickIntakeResult { ProductId = "42", IntakeId = "17", ImageStatus = "attached", PrintStatus = state,
+                    PrinterOnline = false, Completed = state == "queued" || state == "processing" || state == "completed" });
+                Drain(send);
+                string text = Field<TextBlock>(window, "status").Text;
+                string expected = state == "queued" ? "offline" : state == "processing" ? "procesează" : state == "completed" ? "confirmat imprimarea"
+                    : state == "paused" ? "suspendată" : state == "failed" ? "eroare" : state == "cancelled" ? "anulat" : "nu a confirmat";
+                Require(text.Contains(expected), "The UI explains the actual printing state: " + state);
+                if (state == "paused" || state == "failed" || state == "cancelled" || state == "missing")
+                { Require(text.Contains("salvat în CRM") && !Field<bool>(window, "completed"), "A saved product is distinguished from an unsuccessful print job"); }
+                window.Close(); Pump();
+            }
         }
 
         private static void VerifyAssociationChoice()

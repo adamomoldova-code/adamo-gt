@@ -15,9 +15,43 @@ namespace PcPulseTests
     {
         public static void Run()
         {
+            TestLivePrintStatesAndFailureReasons();
             TestOldBackendCannotCreateAnotherDraft(); TestAssociationChoicesAndPublishedProduct(); TestContract(); TestSessionFailures(); TestEncryptedExactReplay(); TestReauthentication();
             TestResponseVerification(); TestConcurrencyAndDisposal(); TestCancellation(); TestDamagedJournal();
             Console.WriteLine("PASS quick CRM: scoped login, minimal wire contract, encrypted exact replay, 401 recovery, receipt/image/print verification and concurrency");
+        }
+
+        private static void TestLivePrintStatesAndFailureReasons()
+        {
+            foreach (string state in new[] { "queued", "processing", "completed", "paused", "failed", "cancelled", "missing" })
+            {
+                var transport = new FakeTransport { MutateIntake = d => {
+                    var print = (Dictionary<string, object>)d["print"];
+                    print["status"] = state; print["printer_online"] = false;
+                } };
+                using (var client = new CrmQuickIntakeClient(transport, Temp()))
+                {
+                    Login(client); var result = client.SubmitAsync(Submission(), CancellationToken.None).GetAwaiter().GetResult();
+                    bool accepted = state == "queued" || state == "processing" || state == "completed";
+                    Require(result.PrintStatus == state && result.PrinterOnline == false, "Live printer status is retained independently of receipt confirmation");
+                    Require(result.Completed == accepted && client.HasPending != accepted, "Paused, failed, cancelled and missing jobs never silently complete a pending operation");
+                }
+            }
+            var errors = new[] {
+                new { Status = 409, Body = "{\"code\":\"receipt_identity_collision\",\"message\":\"PRIVATE_DETAIL\"}", Reason = "receipt_identity_collision" },
+                new { Status = 422, Body = "{\"errors\":{\"association_token\":[\"PRIVATE_DETAIL\"]}}", Reason = "association_invalid" },
+                new { Status = 422, Body = "{\"errors\":{\"screenshot.base64\":[\"PRIVATE_DETAIL\"]}}", Reason = "screenshot_invalid" }
+            };
+            foreach (var item in errors)
+            {
+                var transport = new FakeTransport { AssociationResponse = new CrmHttpResponse { StatusCode = item.Status, Body = item.Body } };
+                using (var client = new CrmQuickIntakeClient(transport, Temp()))
+                {
+                    Login(client);
+                    var error = RequireThrows<CrmException>(() => client.SubmitAsync(Submission(), CancellationToken.None).GetAwaiter().GetResult(), "Structured rejection");
+                    Require(error.ReasonCode == item.Reason && !error.Message.Contains("PRIVATE_DETAIL") && client.HasPending, "Only allowlisted reason codes reach the UI; the immutable request remains recoverable");
+                }
+            }
         }
 
         private static void TestAssociationChoicesAndPublishedProduct()
